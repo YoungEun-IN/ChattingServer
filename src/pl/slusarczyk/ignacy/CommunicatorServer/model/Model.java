@@ -27,7 +27,7 @@ public class Model {
 	}
 
 	/**
-	 * 같은 이름의 방이 존재하는지 확인하는 메소드
+	 * 같은 이름의 방이 존재하는지 확인하고 새 방을 생성하는 메소드
 	 * 
 	 * @param createNewRoom
 	 */
@@ -43,7 +43,7 @@ public class Model {
 	}
 
 	/**
-	 * 주어진 이름을 가진 방에 주어진 닉네임을 가진 사용자를 추가하는 메소드
+	 * 주어진 이름을 가진 방에 주어진 닉네임을 가진 사용자가 있는지 확인하고 사용자를 추가하는 메소드
 	 * 
 	 * @param joinExistingRoom
 	 */
@@ -91,7 +91,7 @@ public class Model {
 					for (Message message : user.getUserMessageHistory()) {
 						messagesOfUser.add(new MessageData(message.getMessage(), message.getDate()));
 					}
-					UserData userData = new UserData(new UserIdData(user.getUserID()), messagesOfUser, user.getUserStatus());
+					UserData userData = new UserData(new UserIdData(user.getUserID()), messagesOfUser, user.isActive());
 					userSet.add(userData);
 				}
 				return new RoomData(userSet);

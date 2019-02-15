@@ -29,7 +29,7 @@ public class UserConnectionHandler extends Thread {
 	/** 블로킹 큐 */
 	private final BlockingQueue<ServerHandledEvent> eventQueue;
 	/** 작업중 식별 플래그 */
-	private boolean running;
+	private boolean isRunning;
 
 	/**
 	 * 주어진 사용자로부터 연결에 대한 새로운 링크를 생성하는 생성자
@@ -42,7 +42,7 @@ public class UserConnectionHandler extends Thread {
 		this.userSocket = userSocket;
 		this.eventQueue = eventQueue;
 		this.userOutputStreams = userOutputStreams;
-		this.running = true;
+		this.isRunning = true;
 
 		try {
 			outputStream = new ObjectOutputStream(userSocket.getOutputStream());
@@ -58,7 +58,7 @@ public class UserConnectionHandler extends Thread {
 	 */
 	public void run() {
 		ServerHandledEvent appEvent;
-		while (running) {
+		while (isRunning) {
 			try {
 				appEvent = (ServerHandledEvent) inputStream.readObject();
 
@@ -93,14 +93,14 @@ public class UserConnectionHandler extends Thread {
 				else if (appEvent instanceof ClientLeftRoom) {
 					eventQueue.add(appEvent);
 					userSocket.close();
-					running = false;
+					isRunning = false;
 				} else {
 					eventQueue.add(appEvent);
 				}
 			} catch (IOException ex) {
 				try {
 					userSocket.close();
-					running = false;
+					isRunning = false;
 				} catch (IOException e) {
 					System.err.println(e);
 				}

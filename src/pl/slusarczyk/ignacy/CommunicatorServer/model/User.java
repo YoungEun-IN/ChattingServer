@@ -64,7 +64,7 @@ class User implements Serializable {
 	 * 
 	 * @return isActive
 	 */
-	public boolean getUserStatus() {
+	public boolean isActive() {
 		return isActive;
 	}
 
