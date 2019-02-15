@@ -2,6 +2,7 @@ package pl.slusarczyk.ignacy.CommunicatorServer.connection;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
@@ -11,49 +12,47 @@ import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledE
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 
 /**
- * Klasa odpowiedzialna za nas흢uchiwanie przez serwer 탉훳da흦 nowych po흢훳cze흦 od klient처w
- * 
- * @author Ignacy 힃lusarczyk
+ * 우리에게 책임지는 클래스는 서버가 클라이언트와 새로운 연결을 할 수있게합니다.
  */
-class ServerSocketHandler extends Thread
-{
-	/**Socket servera*/
+class ServerSocketHandler extends Thread {
+	/** Socket 서버 */
 	private final ServerSocket serverSocket;
-	/**Kolejka blokuj훳ca zdarze흦*/
+	/** 블로킹 큐 */
 	private final BlockingQueue<ServerHandledEvent> eventQueue;
-	/**Mapa u탉ytkownik처w i ich output stream처w*/
-	private final HashMap <UserId,ObjectOutputStream> userOutputStreams;
-	
+	/** 출력 스트림을 사용하여 맵 작성 */
+	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
+
 	/**
-	 * Konstruktor tworz훳cy w훳tek nas흢uchuj훳cy nowych po흢훳cze흦
+	 * 새로운 연결 링크를 생성하는 생성자
 	 * 
-	 * @param serverSocket socket serwera
-	 * @param eventQueue kolejka zdarze흦
-	 * @param userOutputStreams mapa strumieni wyj힄ciowych u탉ytkownik처w
+	 * @param serverSocket
+	 * @param eventQueue
+	 * @param userOutputStreams
 	 */
-	public ServerSocketHandler(final ServerSocket serverSocket, final BlockingQueue<ServerHandledEvent> eventQueue,final HashMap <UserId,ObjectOutputStream> userOutputStreams)
-	{
+	public ServerSocketHandler(final ServerSocket serverSocket, final BlockingQueue<ServerHandledEvent> eventQueue,
+			final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
 		this.serverSocket = serverSocket;
 		this.eventQueue = eventQueue;
 		this.userOutputStreams = userOutputStreams;
 	}
-	
+
 	/**
-	 * G흢처wna p휌tla klasy, w kt처rej nas흢uchuje nowych po흢훳cze흦 od klient처w
+	 * 우리가 새로운 연결을 가지고있는 클래스의 주 루프는 클라이언트의 것입니다.
 	 */
-	public void run()
-	{
-		System.out.println("Serwer zacz훳흢 nas흢uchiwanie nowych po흢훳cze흦 na porcie: " + serverSocket.getLocalPort());
-		while(true)
-		{
-			try
-			{
+	public void run() {
+		System.out.println("서버가 포트에 새 연결을 연결하기 시작했습니다.: " + serverSocket.getLocalPort());
+		while (true) {
+			try {
 				Socket userSocket = serverSocket.accept();
-				UserConnectionHandler newConnection = new UserConnectionHandler (userSocket, eventQueue, userOutputStreams);
-				newConnection.start();	
-			}
-			catch (IOException ex)
-			{
+				
+				InetSocketAddress remoteSocketAddress = (InetSocketAddress) userSocket.getRemoteSocketAddress();
+				String remoteHostName = remoteSocketAddress.getAddress().getHostAddress();
+				int remoteHostPort = remoteSocketAddress.getPort();
+				
+				System.out.println("서버에 클라이언트 연결됨. connected socket address:" + remoteHostName + "port:" + remoteHostPort);
+				UserConnectionHandler userConnection = new UserConnectionHandler(userSocket, eventQueue, userOutputStreams);
+				userConnection.start();
+			} catch (IOException ex) {
 				System.err.println(ex);
 			}
 		}

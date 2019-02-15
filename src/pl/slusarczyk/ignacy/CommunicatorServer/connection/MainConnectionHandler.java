@@ -16,123 +16,100 @@ import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserIdData;
 
 /**
- * Klasa g흢처wna serwera przechowuj훳ca informacje o strumieniach wyj힄ciowych u탉ytkownik처w i rozsy흢aj훳ca wiadomo힄ci
- * 
- * @author Ignacy 힃lusarczyk
+ * 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
  */
-public class MainConnectionHandler 
-{
-	/** Mapa przetrzymuj훳ca strumienie wyj힄ciowe u탉ytkownik처w, w kt처rej kluczem jest userId */
-	private final HashMap <UserId, ObjectOutputStream> userOutputStreams;
-	/**Socket servera*/
+public class MainConnectionHandler {
+	/** userId가 키인 출력 스트림을 사용자가 보유하고있는 맵 */
+	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
+	/** 서버소켓 */
 	private ServerSocket serverSocket;
-	/**Port na kt처rym serwer nas흢uchuje*/
+	/** 포트 넘버 */
 	private final int portNumber;
-	/**Kolejka blouj훳ca zdarze흦*/
-	private final BlockingQueue<ServerHandledEvent> eventQueue; 
-	
+	/** 이벤트 큐 */
+	private final BlockingQueue<ServerHandledEvent> eventQueue;
+
 	/**
-	 * Konstruktor w흢훳czaj훳cy serwer na podanym porcie, kt처ry tworzy oddzielny w훳tek do nas흢uchiwania nowych po흢훳cze흦
+	 * 지정된 포트에 서버를 연결하는 생성자. 새 연결을 연결하기 위해 별도의 링크를 만듭니다.
 	 * 
-	 * @param portNumber numer portu
-	 * @param eventQueue kolejka blokuj훳ca zdarze흦
+	 * @param portNumber
+	 * @param eventQueue
 	 */
-	public MainConnectionHandler (final int portNumber, final BlockingQueue<ServerHandledEvent> eventQueueObject)
-	{
-		this.eventQueue = eventQueueObject;
+	public MainConnectionHandler(final int portNumber, final BlockingQueue<ServerHandledEvent> eventQueueObject) {
 		this.portNumber = portNumber;
-		this.userOutputStreams = new HashMap <UserId, ObjectOutputStream>();
-		
+		this.eventQueue = eventQueueObject;
+		this.userOutputStreams = new HashMap<UserId, ObjectOutputStream>();
+
 		createServerSocket();
 		ServerSocketHandler serverSocketHandler = new ServerSocketHandler(serverSocket, eventQueue, userOutputStreams);
 		serverSocketHandler.start();
 	}
-	
+
 	/**
-	 * Metoda tworz훳ca server socket na zadanym porcie
+	 * 지정된 포트에 서버 소켓을 만드는 메소드
 	 */
-	public void createServerSocket()
-	{
-		try
-		{
+	public void createServerSocket() {
+		try {
 			this.serverSocket = new ServerSocket(portNumber);
-		}
-		catch(IOException ex)
-		{
-			System.err.println("Nast훳pi흢 b흢훳d podczas tworzenia po흢훳czenia " + ex);
-			System.exit(1);	
+		} catch (IOException ex) {
+			System.err.println("연결을 만들 때 익셉션 발생. " + ex);
+			System.exit(1);
 		}
 	}
-	
+
 	/**
-	 * Metoda wysy흢aj훳ca bezpo힄rednio wiadomo힄훶 do u탉ytkownika o zadanym nicku
+	 * 같은 방에있는 모든 사용자에게 메시지 보내는 메소드
 	 * 
-	 * @param userName nazwa u탉ytkownika
-	 * @param usersConversation rozmowa pomi휌dzy u탉ytkownikami
-	 * @param listOfUsers lista u탉ytkownik처w aktualnie b휌d훳cych na chacie
+	 * @param roomData
 	 */
-	public void sendDirectMessage (final UserIdData userIdData,final RoomData roomData)
-	{
-		try
-		{
-			ConversationServerEvent userConversationToSend = new ConversationServerEvent (roomData);
-			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(userConversationToSend);
-		}
-		catch(IOException ex)
-		{
-			System.err.println(ex);
-		}
-	}
-	
-	/**
-	 * Metoda wysy흢aj훳ca rozmow휌 do wszystkich u탉ytkownik처w znajduj훳cych si휌 w tym samym pokoju
-	 * 
-	 * @param roomData Opakowany obiekt pok처j, w kt처rym znajduje si휌 konwersacja do wy힄wietlenia oraz lista u탉ytkownik처w
-	 */
-	public void sendMessageToAll (final RoomData roomData)
-	{
-		for (UserData userData: roomData.getUserSet())
-		{
-			if(userData.isUserActive())
-			{
+	public void sendMessageToAll(final RoomData roomData) {
+		for (UserData userData : roomData.getUserSet()) {
+			if (userData.isUserActive()) {
 				sendDirectMessage(userData.getUserIdData(), roomData);
 			}
 		}
 	}
-	
+
 	/**
-	 * Metoda wysy흢aj훳ca do klienta potwierdzenie poprawnego utworzenia lub dodania do pokoju
+	 * 주어진 닉네임을 가진 사용자에게 직접 메시지를 보내는 메소드
+	 * 
+	 * @param userName
+	 * @param usersConversation 사용자 간의 대화
+	 * @param listOfUsers       현재 채팅중인 사용자 목록
+	 */
+	public void sendDirectMessage(final UserIdData userIdData, final RoomData roomData) {
+		try {
+			ConversationServerEvent userConversationToSend = new ConversationServerEvent(roomData);
+			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(userConversationToSend);
+		} catch (IOException ex) {
+			System.err.println("익셉션 발생. " + ex);
+		}
+	}
+
+	/**
+	 * 방을 올바르게 만들거나 추가하기 위해 클라이언트에게 확인을 보내는 메소드
 	 * 
 	 * @param userId
-	 * @param connectionEstablished
+	 * @param isEstablished
 	 */
-	public void connectionEstablished(final UserIdData userIdData,final boolean connectionEstablished,final String roomName)
-	{
-		try 
-		{
-			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new ConnectionEstablishedServerEvent(connectionEstablished,userIdData,roomName));
-		} 
-		catch (IOException e) 
-		{
+	public void assertConnectionEstablished(final UserIdData userIdData, final boolean isEstablished, final String roomName) {
+		try {
+			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new ConnectionEstablishedServerEvent(isEstablished, userIdData, roomName));
+		} catch (IOException e) {
 			System.err.println(e);
 		}
-	}	
-	
+	}
+
 	/**
-	 * Metoda s흢u탉훳ca do wys흢ania wiadomo힄ci informacyjnej do u탉ytkownika
+	 * 이 메서드는 사용자에게 메시지를 보내는 데 사용됩니다.
 	 * 
-	 * @param messageObject Obiekt zawieraj훳cy w sobie wiadomo힄훶 do wy힄wietlenia oraz nick u탉ytkownika do kt처rego wysy흢amy wiadomo힄훶 informacyjn훳
+	 * @param messageObject 표시 할 메시지와 정보 메시지를 보내는 사용자의 닉네임 포함
 	 */
-	public void sendMessage(MessageServerEvent messageObject)
-	{
-		try
-		{
+	public void sendMessage(MessageServerEvent messageObject) {
+		try {
 			userOutputStreams.get(new UserId(messageObject.getUserIDData().getUserName())).writeObject(messageObject);
 			userOutputStreams.remove(new UserId(messageObject.getUserIDData().getUserName()));
-		}
-		catch(IOException ex)
-		{
-			System.err.println(ex);
+		} catch (IOException ex) {
+			System.err.println("익셉션 발생. " + ex);
 		}
 	}
 }

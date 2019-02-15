@@ -5,155 +5,120 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.NewMessage;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.connection.MainConnectionHandler;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.Model;
 
 /**
- * Klasa kontrolera odpowiadajaca za odpowiedni훳 komunikacj휌 pomi휌dzy klientem a serwerem, zawieraj훳ca w sobie klasy
- * odpowiadaj훳ce strategiom obs흢ugi zdarze흦 pochodz훳cych od klienta
- * 
- * @author Ignacy 힃lusarczyk
+ * 클라이언트와 서버 간의 적절한 통신을 담당하는 컨트롤러 클래스. 클라이언트의 고객 서비스 전략에 해당하는 클래스 포함
  */
-public class Controller 
-{
-	/**Kolejka blokuj훳ca*/
+public class Controller {
+	/** 이벤트 큐 */
 	private final BlockingQueue<ServerHandledEvent> eventQueue;
-	/**Referencja do modelu*/
+	/** 모델 */
 	private final Model model;
-	/**Mapa strategii obs흢ugi zdarze흦*/
-	private final Map<Class<? extends ServerHandledEvent>, clientEventStrategy> strategyMap;
-	/**Referencja do Servera*/
+	/** 이벤트 처리 전략 맵 */
+	private final Map<Class<? extends ServerHandledEvent>, ClientEventStrategy> strategyMap;
+	/** 서버에 대한 참조 */
 	private final MainConnectionHandler mainConnectionHandler;
-	
+
 	/**
-	 * Konstruktor tworz훳cy controler na podstawie zadanych parametr처w
+	 * 지정된 매개 변수를 기반으로 컨트롤을 만드는 생성자
 	 * 
-	 * @param eventQueue kolejka blokuj훳ca
-	 * @param model model
-	 * @param mainConnectionHandler serwer
+	 * @param eventQueue
+	 * @param model
+	 * @param mainConnectionHandler 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
 	 */
-	public Controller(final BlockingQueue<ServerHandledEvent>  eventQueue, final Model model, final MainConnectionHandler mainConnectionHandler)
-	{
+	public Controller(final BlockingQueue<ServerHandledEvent> eventQueue, final Model model, final MainConnectionHandler mainConnectionHandler) {
 		this.eventQueue = eventQueue;
 		this.model = model;
 		this.mainConnectionHandler = mainConnectionHandler;
-		
-		//Tworzenie mapy strategii obs흢ugi zdarze흦
-		strategyMap = new HashMap<Class<? extends ServerHandledEvent>, clientEventStrategy>();
+
+		// 이벤트 처리 정책 맵 작성
+		strategyMap = new HashMap<Class<? extends ServerHandledEvent>, ClientEventStrategy>();
 		strategyMap.put(CreateNewRoom.class, new CreateNewRoomStrategy());
 		strategyMap.put(JoinExistingRoom.class, new JoinExistingRoomStrategy());
-		strategyMap.put(NewMessage.class, new NewMessageStrategy());	
-		strategyMap.put(ClientLeftRoom.class,new ClientLeftRoomStrategy());
+		strategyMap.put(NewMessage.class, new NewMessageStrategy());
+		strategyMap.put(ClientLeftRoom.class, new ClientLeftRoomStrategy());
 	}
-			
-		/**
-		 * G흢처wna metoda kontrolera, czeka on w niej na zdarzenia, a nast휌pnie odpowiednio je obs흢uguje.
-		 */
-		public void work()
-		{
-			while (true)
-			{
-				try
-				{
-					ServerHandledEvent serverHandeledEvent = eventQueue.take();
-					clientEventStrategy applicationEventStrategy = strategyMap.get(serverHandeledEvent.getClass());
-					applicationEventStrategy.execute(serverHandeledEvent);
-				}
-				catch(InterruptedException e)
-				{
-					//Nic nie robimy, poniewa탉 kontroler ma by훶 zawieszony dop처ki nie pojawi si휌 zdarzenie
-				}
+
+	/**
+	 * 컨트롤러의 주요 메소드는 이벤트를 기다린 다음 올바르게 처리합니다.
+	 */
+	public void work() {
+		while (true) {
+			try {
+				ServerHandledEvent serverHandledEvent = eventQueue.take();
+				ClientEventStrategy clientEventStrategy = strategyMap.get(serverHandledEvent.getClass());
+				clientEventStrategy.execute(serverHandledEvent);
+			} catch (InterruptedException e) {
+				// 컨트롤러가 이벤트가 나타날 때까지 일시 중지해야하므로 아무 것도하지 않습니다.
 			}
 		}
-		
+	}
+
+	/**
+	 * 이벤트를 처리하는 전략 클래스의 추상 기본 클래스입니다
+	 */
+	abstract class ClientEventStrategy {
 		/**
-		 * Abstrakcyjna klasa bazowa dla klas strategii obs흢uguj훳cych zdarzenia.
+		 * 주어진 이벤트의 서비스를 기술하는 추상 메소드.
 		 * 
-		 * @author Ignacy 힃lusarczyk
+		 * @param applicationEvent 지원되어야하는 응용 프로그램 이벤트
 		 */
-		abstract class clientEventStrategy
-		{
-			/**
-			 * Abstrakcyjna metoda opisuj훳ca obs흢ug휌 danego zdarzenia.
-			 * 
-			 * @param applicationEvent zdarzenie aplikacji kt처re musi zosta훶 obs흢u탉one
-			 */
-			abstract void execute(final ServerHandledEvent applicationEvent);
-		}
-		
-		/**
-		 * Klasa wewn휌trzna opisuj훳ca strategi휌 obs흢ugi 탉훳dania przez u탉ytkownika utworzenia nowego pokoju
-		 *
-		 * @author Ignacy 힃lusarczyk
-		 */
-		class CreateNewRoomStrategy extends clientEventStrategy
-		{
-			void execute(final ServerHandledEvent applicationEventObject)
-			{
-				CreateNewRoom createNewRoom = (CreateNewRoom) applicationEventObject;
-				if (model.createNewRoom(createNewRoom))
-				{
-					mainConnectionHandler.connectionEstablished(createNewRoom.getUserIdData(), true, createNewRoom.getRoomName());
-				}
-				else 
-				{
-					mainConnectionHandler.sendMessage(new MessageServerEvent("Pokoj o zadanej nazwie juz istnieje",createNewRoom.getUserIdData()));
-				}
+		abstract void execute(final ServerHandledEvent applicationEvent);
+	}
+
+	/**
+	 * 새 방을 만들어 사용자를 운영하는 전략을 설명하는 내부 클래스입니다.
+	 */
+	class CreateNewRoomStrategy extends ClientEventStrategy {
+		void execute(final ServerHandledEvent applicationEventObject) {
+			CreateNewRoom newRoom = (CreateNewRoom) applicationEventObject;
+			if (model.createNewRoom(newRoom)) {
+				mainConnectionHandler.assertConnectionEstablished(newRoom.getUserIdData(), true, newRoom.getRoomName());
+			} else {
+				mainConnectionHandler.sendMessage(new MessageServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", newRoom.getUserIdData()));
 			}
 		}
-		
-		/**
-		 * Klasa wewn휌trzna opisuj훳ca strategi휌 obs흢ugi 탉훳dania przez u탉ytkownika do흢훳czenia do istniej훳cego pokoju
-		 *
-		 * @author Ignacy 힃lusarczyk
-		 */
-		class JoinExistingRoomStrategy extends clientEventStrategy
-		{
-			void execute(final ServerHandledEvent applicationEventObject)
-			{
-				JoinExistingRoom joinExistingRoom = (JoinExistingRoom) applicationEventObject;	
-				if(model.addUserToSpecificRoom(joinExistingRoom) == true)
-				{
-					mainConnectionHandler.connectionEstablished(joinExistingRoom.getUserIdData(), true,joinExistingRoom.getRoomName());
-				}
-				else 
-				{
-					mainConnectionHandler.sendMessage(new MessageServerEvent("Pokoj do ktorego chcesz dolaczyc nie istnieje",joinExistingRoom.getUserIdData()));
-				}
+	}
+
+	/**
+	 * 기존 방에 합류하기위한 사용자 지원 전략을 설명하는 내부 클래스입니다.
+	 */
+	class JoinExistingRoomStrategy extends ClientEventStrategy {
+		void execute(final ServerHandledEvent applicationEventObject) {
+			JoinExistingRoom joinExistingRoomInformation = (JoinExistingRoom) applicationEventObject;
+			if (model.addUserToSpecificRoom(joinExistingRoomInformation) == true) {
+				mainConnectionHandler.assertConnectionEstablished(joinExistingRoomInformation.getUserIdData(), true, joinExistingRoomInformation.getRoomName());
+			} else {
+				mainConnectionHandler.sendMessage(new MessageServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomInformation.getUserIdData()));
 			}
 		}
-	
-		/**
-		 * Klasa wewn휌trzna opisuj훳ca strategi휌 obs흢ugi wys흢ania przez u탉ytkownika nowej wiadomo힄ci
-		 * 
-		 * @author Ignacy 힃lusarczyk
-		 */
-		class NewMessageStrategy extends clientEventStrategy
-		{
-			void execute(final ServerHandledEvent applicationEventObject)
-			{
-				NewMessage newMessage = (NewMessage) applicationEventObject;
-				model.addMessageOfUser(newMessage);
-				mainConnectionHandler.sendMessageToAll(model.getRoomDataFromRoom(newMessage));	
-			}
+	}
+
+	/**
+	 * 사용자가 새 메시지를 보내는 서비스 전략을 설명하는 내부 클래스
+	 */
+	class NewMessageStrategy extends ClientEventStrategy {
+		void execute(final ServerHandledEvent applicationEventObject) {
+			NewMessage newMessageInformation = (NewMessage) applicationEventObject;
+			model.addMessageOfUser(newMessageInformation);
+			mainConnectionHandler.sendMessageToAll(model.getRoomDataFromRoom(newMessageInformation));
 		}
-		
-		/**
-		 * Klasa wewn휌trzna opisuj훳ca strategi휌 wyjscia u탉ytkownika z pokoju rozm처w
-		 * 
-		 * @author Ignacy 힃lusarc
-		 */
-		class ClientLeftRoomStrategy extends clientEventStrategy
-		{
-			void execute(final ServerHandledEvent applicationEventObject) 
-			{
-				ClientLeftRoom clientLeftRoom = (ClientLeftRoom) applicationEventObject;
-				model.setUserToInactive(clientLeftRoom);
-			}
+	}
+
+	/**
+	 * 방의 사용자의 이탈 전략을 설명하는 내부 클래스입니다.
+	 */
+	class ClientLeftRoomStrategy extends ClientEventStrategy {
+		void execute(final ServerHandledEvent applicationEventObject) {
+			ClientLeftRoom clientLeftRoomInformation = (ClientLeftRoom) applicationEventObject;
+			model.setUserToInactive(clientLeftRoomInformation);
 		}
+	}
 }

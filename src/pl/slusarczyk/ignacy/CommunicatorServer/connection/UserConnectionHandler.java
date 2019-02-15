@@ -8,138 +8,109 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoom;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 
-/** Klasa odpowiedzialna za odbieranie zdarze흦 od klienta i dodawanie ich do kolejki
- * 
- * @author Ignacy 힃lusatczyk
+/**
+ * 클라이언트로부터 이벤트를 수신하여 큐에 추가하는 역할을 담당하는 클래스
  */
-public class UserConnectionHandler extends Thread
-{
-	/**Socket klienta*/
+public class UserConnectionHandler extends Thread {
+	/** userSocket */
 	private final Socket userSocket;
-	/**Strumie흦 wej힄ciowy*/
+	/** 입력 스트림 */
 	private ObjectInputStream inputStream;
-	/**Strumie흦 wyj힄ciowy*/
+	/** 출력 스트림 */
 	private ObjectOutputStream outputStream;
-	/**Mapa ID user처w oraz ich strumieni wyj힄ciowych*/
-	 private final HashMap<UserId,ObjectOutputStream> userOutputStreams;
-	/**Kolejka blokuj훳ca zdarze흦*/
-	 private final BlockingQueue<ServerHandledEvent> eventQueue;
-	 /**Flaga okre힄laj훳ca czy w훳tek pracuje*/
-	 private boolean running;
-	
+	/** 사용자별 출력 스트림 맵 */
+	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
+	/** 블로킹 큐 */
+	private final BlockingQueue<ServerHandledEvent> eventQueue;
+	/** 작업중 식별 플래그 */
+	private boolean running;
+
 	/**
-	 * Konstruktor tworz훳cy nowy w훳tek nas흢uchuj훳cy po흢훳cze흦 od danego u탉ytkownika
+	 * 주어진 사용자로부터 연결에 대한 새로운 링크를 생성하는 생성자
 	 * 
-	 * @param userSocket socket u탉ytkownika
-	 * @param eventQueue kolejka zdarze흦
-	 * @param userOutputStreams mapa strumieni wyj힄ciowych
+	 * @param userSocket        
+	 * @param eventQueue        
+	 * @param userOutputStreams
 	 */
-	public UserConnectionHandler (final Socket userSocket,final BlockingQueue<ServerHandledEvent> eventQueue,final HashMap <UserId,ObjectOutputStream> userOutputStreams)
-	{
+	public UserConnectionHandler(final Socket userSocket, final BlockingQueue<ServerHandledEvent> eventQueue, final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
 		this.userSocket = userSocket;
 		this.eventQueue = eventQueue;
 		this.userOutputStreams = userOutputStreams;
 		this.running = true;
-		
-		try
-		{
+
+		try {
 			outputStream = new ObjectOutputStream(userSocket.getOutputStream());
 			inputStream = new ObjectInputStream(userSocket.getInputStream());
-		}
-		catch (IOException ex)
-		{
-			System.err.println("Nastapi흢 b흢훳d podczas tworzenia strumienia z klientem" + ex);
+		} catch (IOException ex) {
+			System.err.println("클라이언트와 함께 스트림을 생성 할 때 예외 발생. " + ex);
 			return;
 		}
 	}
-	
+
 	/**
-	 * G흢처wna p휌tla klasy, w kt처rej nas흢uchuje zdarze흦 od klienta i dodaje je do kolejki blokuj훳cej
+	 * 클라이언트에서 이벤트를 수신하여 블로킹 큐에 추가하는 클래스의 기본 루프
 	 */
-		public void run()
-		{
-			ServerHandledEvent appEvent;
-			while(running)
-			{	
-				try
-				{
-					appEvent = (ServerHandledEvent) inputStream.readObject();
-			
-					/**W przypadku kiedy od klienta przychodzi 탉훳danie do흢훳czenia do pokoju lub jego utworzenia musimy zapisa훶 jego strumie흦 wyj힄ciowy*/
-					if (appEvent instanceof CreateNewRoom) 
-					{
-						CreateNewRoom createNewRoom = (CreateNewRoom) appEvent;	
-						
-						/** Przed dodaniem do mapy musimy sprawdzi훶 czy dany u탉ytkownik ju탉 nie istnieje*/
-						if (userOutputStreams.get(new UserId(createNewRoom.getUserIdData().getUserName())) != null)
-						{
-							outputStream.writeObject(new MessageServerEvent("Uzytkownik o podanej nazwie juz istnieje", createNewRoom.getUserIdData()));				
-						}
-						/**Je힄li nie istnieje dodajemy go do mapy*/
-						else
-						{
-							userOutputStreams.put(new UserId(createNewRoom.getUserIdData().getUserName()), outputStream);
-							eventQueue.add(appEvent);
-						}
+	public void run() {
+		ServerHandledEvent appEvent;
+		while (running) {
+			try {
+				appEvent = (ServerHandledEvent) inputStream.readObject();
+
+				/** 클라이언트가 방에 들어 오거나 방을 만들 때, 출력 스트림을 작성해야합니다. */
+				if (appEvent instanceof CreateNewRoom) {
+					CreateNewRoom createNewRoomInformation = (CreateNewRoom) appEvent;
+
+					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
+					if (userOutputStreams.get(new UserId(createNewRoomInformation.getUserIdData().getUserName())) != null) {
+						outputStream.writeObject(new MessageServerEvent("주어진 이름의 사용자가 이미 있습니다.", createNewRoomInformation.getUserIdData()));
 					}
-					else if(appEvent instanceof JoinExistingRoom)
-					{
-						JoinExistingRoom joinNewRoom = (JoinExistingRoom) appEvent;	
-						
-						/** Przed dodaniem do mapy musimy sprawdzi훶 czy dany u탉ytkownik ju탉 nie istnieje*/
-						if (userOutputStreams.get(new UserId(joinNewRoom.getUserIdData().getUserName())) != null)
-						{
-							outputStream.writeObject(new MessageServerEvent("Uzytkownik o podanej nazwie juz istnieje", joinNewRoom.getUserIdData()));			
-						}
-						else
-						{
-							/**Je힄li nie istnieje dodajemy go do mapy*/
-							userOutputStreams.put(new UserId(joinNewRoom.getUserIdData().getUserName()), outputStream);
-							eventQueue.add(appEvent);
-						}
-					}
-					/**Jesli dostaniemy obiekt reprezentuj훳cy wyj힄cie cz흢owieka z chatu musimy zatrzyma훶 w훳tek i przekaza훶 zdarzenie do kontrolera*/
-					else if(appEvent instanceof ClientLeftRoom)
-					{
+					/** 존재하지 않으면 맵에 추가합니다. */
+					else {
+						userOutputStreams.put(new UserId(createNewRoomInformation.getUserIdData().getUserName()), outputStream);
 						eventQueue.add(appEvent);
-						userSocket.close();
-						running = false;
 					}
-					else 
-					{
+				} else if (appEvent instanceof JoinExistingRoom) {
+					JoinExistingRoom joinNewRoomInformation = (JoinExistingRoom) appEvent;
+
+					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
+					if (userOutputStreams.get(new UserId(joinNewRoomInformation.getUserIdData().getUserName())) != null) {
+						outputStream.writeObject(new MessageServerEvent("주어진 이름의 사용자가 이미 있습니다.", joinNewRoomInformation.getUserIdData()));
+					} else {
+						/** 존재하지 않으면 맵에 추가합니다. */
+						userOutputStreams.put(new UserId(joinNewRoomInformation.getUserIdData().getUserName()), outputStream);
 						eventQueue.add(appEvent);
 					}
 				}
-				catch (IOException ex)
-				{
-					try 
-					{
-						userSocket.close();
-						running = false;
-					}
-					catch (IOException e) 
-					{
-						System.err.println(e);
-					}
+				/**
+				 * 채팅에서 사람의 출구를 나타내는 객체를 얻는다면 우리는 멈추고 컨트롤러에 이벤트를 보내야합니다.
+				 */
+				else if (appEvent instanceof ClientLeftRoom) {
+					eventQueue.add(appEvent);
+					userSocket.close();
+					running = false;
+				} else {
+					eventQueue.add(appEvent);
 				}
-				catch (ClassNotFoundException ex)
-				{
-					System.err.println("B흢훳d rzutowania przychodz훳cej informacji" + ex);
+			} catch (IOException ex) {
+				try {
+					userSocket.close();
+					running = false;
+				} catch (IOException e) {
+					System.err.println(e);
 				}
-				catch (NullPointerException ex)
-				{
-					System.err.println("B흢훳d odbierania obiektu" + ex);
-				}
-				catch(ClassCastException ex)
-				{
-					System.err.println(ex);
-				}
+			} catch (ClassNotFoundException ex) {
+				System.err.println("ClassNotFoundException" + ex);
+			} catch (NullPointerException ex) {
+				System.err.println("NullPointerException" + ex);
+			} catch (ClassCastException ex) {
+				System.err.println(ex);
 			}
 		}
+	}
 }
