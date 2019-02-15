@@ -1,12 +1,9 @@
 package pl.slusarczyk.ignacy.CommunicatorServer.model;
 
-import java.io.Serializable;
-
 /**
  * equals 메서드와 hashCode 메서드를 포함한 사용자의 이름을 래핑하는 클래스
  */
-public class UserId implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class UserId {
 	/** userName */
 	private final String userName;
 

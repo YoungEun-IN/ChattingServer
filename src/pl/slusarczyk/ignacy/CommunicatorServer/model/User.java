@@ -1,6 +1,5 @@
 package pl.slusarczyk.ignacy.CommunicatorServer.model;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.HashSet;
 
@@ -11,8 +10,7 @@ import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.NewMessage;
  * 유형 세트로 구성됩니다.
  */
 
-class User implements Serializable {
-	private static final long serialVersionUID = 1L;
+class User {
 	/** userID */
 	private final UserId userID;
 	/** 사용자가 보낸 일련의 메시지 */
