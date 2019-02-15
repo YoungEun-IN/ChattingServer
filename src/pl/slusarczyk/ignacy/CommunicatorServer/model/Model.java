@@ -12,104 +12,84 @@ import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserIdData;
 
-/**Klasa, kt처ra udost휌pnia ca흢y interfejs modelu 
- * 
- * @author Ignacy 힃lusarczyk
- *
+/**
+ * 전체 모델 인터페이스를 제공하는 클래스
  */
-public class Model
-{
-	/**Zbi처r zawieraj훳cy list휌 aktywnych pokoi*/
+public class Model {
+	/** 액티브 룸 목록이 포함 된 세트 */
 	private final HashSet<Room> roomList;
-	
+
 	/**
-	 * Konstruktor tworzy pusty zbi처r pokoi
+	 * 생성자
 	 */
-	public Model()
-	{
+	public Model() {
 		this.roomList = new HashSet<Room>();
 	}
-	
-	/** 
-	 * Metoda tworz훳ca nowy pok처j oraz dodaj훳ca pierwszego u탉ytkownika, kt처ry ten pok처j utworzy흢
+
+	/**
+	 * 같은 이름의 방이 존재하는지 확인하는 메소드
 	 * 
-	 * @param createNewRoom opakowane informacje potrzebne do za흢o탉enia nowego pokoju
+	 * @param createNewRoom
 	 */
-	public boolean createNewRoom(final CreateNewRoom createNewRoom)
-	{
-		for(Room room : roomList)
-		{
-			if (room.getRoomName().equals(createNewRoom.getRoomName()))
-			{
+	public boolean createNewRoom(final CreateNewRoom createNewRoom) {
+		for (Room room : roomList) {
+			if (room.getRoomName().equals(createNewRoom.getRoomName())) {
 				return false;
 			}
 		}
-	
+
 		roomList.add(new Room(createNewRoom.getRoomName(), new UserId(createNewRoom.getUserIdData().getUserName())));
 		return true;
 	}
 
 	/**
-	 * Metoda dodaj훳ca u탉ytkownika o zadanym nicku do pokoju o zadanej nazwie 
+	 * 주어진 이름을 가진 방에 주어진 닉네임을 가진 사용자를 추가하는 메소드
 	 * 
-	 * @param joinExistingRoom opakowane informacje potrzebne do do흢훳czenia u탉ytkownika do danego pokoju
+	 * @param joinExistingRoom
 	 */
-	public boolean addUserToSpecificRoom (final JoinExistingRoom joinExistingRoom)
-	{
-		for (Room room : roomList)
-		{
-			if (joinExistingRoom.getRoomName().equals(room.getRoomName()))
-			{
+	public boolean addUserToSpecificRoom(final JoinExistingRoom joinExistingRoom) {
+		for (Room room : roomList) {
+			if (joinExistingRoom.getRoomName().equals(room.getRoomName())) {
 				room.addUser(new UserId(joinExistingRoom.getUserIdData().getUserName()));
 				return true;
 			}
 		}
 		return false;
 	}
-		
+
 	/**
-	 * Metoda odpowiedzialna za dodanie wiadomo힄ci od u탉ytkownika do jego historii wiadomo힄ci
+	 * 사용자의 메시지 기록에 메시지를 추가하는 책임을지는 메소드
 	 * 
-	 * @param neMessageInformation opakowane informacje potrzebne do dodania nowej wiaodmo힄ci u탉ytownika
+	 * @param neMessage
 	 */
-	public void addMessageOfUser (final NewMessage newMessage)
-	{
-		for (Room room : roomList)
-		{
-			if (newMessage.getRoomName().equals(room.getRoomName()))
-			{
-				for (User user: room.getUserList())
-				{		
-					if (new UserId(newMessage.getUserIdData().getUserName()).equals(user.getUserID()))
-					{
+	public void addMessageOfUser(final NewMessage newMessage) {
+		for (Room room : roomList) {
+			if (newMessage.getRoomName().equals(room.getRoomName())) {
+				for (User user : room.getUserList()) {
+					if (new UserId(newMessage.getUserIdData().getUserName()).equals(user.getUserID())) {
 						user.addMessage(newMessage, Calendar.getInstance().getTime());
 					}
 				}
 			}
-		}	
+		}
 	}
-	
+
 	/**
-	 * Metoda opakowuj훳ca dane pokoju, do kt처rego przysz흢a nowa wiadomo힄훶 
+	 * 새로운 메시지가 온 방의 세부 사항을 마무리하는 메소드
 	 * 
-	 * @param newMessageInformation opakowana wiadomo힄훶 wys흢ana do pokoju, z kt처rego dane chcemy pobra훶
+	 * @param newMessage
 	 * 
-	 * @return opakowane informacje o pokoju
+	 * @return RoomData Object
 	 */
-	public RoomData getRoomDataFromRoom (final NewMessage newMessageObject)
-	{
-		HashSet<UserData> userSet= new HashSet<UserData>();
-	
-		for (Room room : roomList)
-		{
-			if (newMessageObject.getRoomName().equals(room.getRoomName()))
-			{
-				for(User user: room.getUserList())
-				{
-					HashSet<MessageData> messagesOfUser= new HashSet<MessageData>();
-					for(Message message: user.getUserMessageHistory())
-					{
-						messagesOfUser.add(new MessageData(message.getMessage(),message.getDate()));
+	public RoomData getRoomDataFromRoom(final NewMessage newMessageObject) {
+		HashSet<UserData> userSet = new HashSet<UserData>();
+
+		for (Room room : roomList) {
+			if (newMessageObject.getRoomName().equals(room.getRoomName())) {
+				for (User user : room.getUserList()) {
+					HashSet<MessageData> messagesOfUser = new HashSet<MessageData>();
+					for (Message message : user.getUserMessageHistory()) {
+						messagesOfUser.add(new MessageData(message.getMessage(), message.getDate()));
 					}
 					UserData userData = new UserData(new UserIdData(user.getUserID()), messagesOfUser, user.getUserStatus());
 					userSet.add(userData);
@@ -119,22 +99,17 @@ public class Model
 		}
 		return null;
 	}
-	
+
 	/**
-	 * Metoda oznaczaj훳ca danego u탉ytkownika jako nieaktywnego
+	 * 사용자를 비활성으로 나타내는 메소드
 	 * 
-	 * @param clientLeftRoom informacje o u탉ytkowniku, kt처ry wyszed흢 z chatu
+	 * @param clientLeftRoom
 	 */
-	public void setUserToInactive (ClientLeftRoom clientLeftRoom)
-	{
-		for (Room room: roomList)
-		{
-			if(room.getRoomName().equals(clientLeftRoom.getRoomName()))
-			{
-				for (User user:room.getUserList())
-				{
-					if(user.getUserID().equals(new UserId(clientLeftRoom.getUserIDData().getUserName())))
-					{
+	public void setUserToInactive(ClientLeftRoom clientLeftRoom) {
+		for (Room room : roomList) {
+			if (room.getRoomName().equals(clientLeftRoom.getRoomName())) {
+				for (User user : room.getUserList()) {
+					if (user.getUserID().equals(new UserId(clientLeftRoom.getUserIDData().getUserName()))) {
 						user.setUserToInactive();
 					}
 				}

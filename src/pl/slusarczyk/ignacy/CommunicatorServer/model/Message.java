@@ -3,35 +3,33 @@ package pl.slusarczyk.ignacy.CommunicatorServer.model;
 import java.io.Serializable;
 import java.util.Date;
 
-/** Klasa reprezentujÄ…ca pojedyÅ„czÄ… wiadomoÅ›Ä‡ ktÃ³re skÅ‚adajÄ… siÄ™ na caÅ‚Ä… rozmowÄ™ uÅ¼ytkownika 
- * 
- * @author Ignacy ÅšLusarczyk
- *
+/** 
+ * »ç¿ëÀÚÀÇ ÀüÃ¼ ´ëÈ­·Î ±¸¼ºµÈ ¸Ş½ÃÁöÀÇ ´ÜÀÏ ºÎºĞÀ» ³ªÅ¸³»´Â Å¬·¡½º
  */
 class Message implements Comparable<Message>,  Serializable
 {
 	private static final long serialVersionUID = 1L;
-	/**TreÅ›Ä‡ konkretnej wiadomoÅ›ci*/
+	/**message*/
 	private final String message;
-	/**Znacznik czasowy utworzenia danej wiadomoÅ›ci*/
-	private final Date createdOn;
+	/**timeStamp*/
+	private final Date timeStamp;
 
 	/**
-	 * Konstruktor tworzÄ…cy wiadomoÅ›Ä‡ na podstawie jej treÅ›ci oraz znacznika czasowego
+	 * ³»¿ë°ú Å¸ÀÓ ½ºÅÆÇÁ¸¦ ±â¹İÀ¸·Î ¸Ş½ÃÁö¸¦ »ı¼ºÇÏ´Â »ı¼ºÀÚ
 	 * 
-	 * @param message TreÅ›Ä‡ wiadomoÅ›ci
-	 * @param timestamp Znacznik czasowy
+	 * @param message
+	 * @param timestamp
 	 */
 	public Message (final String message,final Date timestamp)
 	{
 		this.message = message;
-		this.createdOn = timestamp;
+		this.timeStamp = timestamp;
 	}
 	
 	/**
-	 * Metoda zwracajÄ…ca treÅ›Ä‡ konkretnej wiadomoÅ›ci
+	 * Æ¯Á¤ ¸Ş½ÃÁöÀÇ ³»¿ëÀ» ¹İÈ¯
 	 * 
-	 * @return TreÅ›Ä‡ wiadomoÅ›ci
+	 * @return message
 	 */
 	public String getMessage()
 	{
@@ -39,17 +37,17 @@ class Message implements Comparable<Message>,  Serializable
 	}
 	
 	/**
-	 * Metoda zwracajÄ…ca datÄ™ utworzenia wiadomoÅ›ci 
+	 * Å¸ÀÓ ½ºÅÆÇÁ¸¦ ¸®ÅÏ
 	 * 
-	 * @return Data utworzenia wiadomoÅ›ci
+	 * @return timeStamp
 	 */
 	public Date getDate ()
 	{
-		return createdOn;
+		return timeStamp;
 	}
 	
 	/** 
-	 * Metoda ktÃ³ra umoÅ¼liwia posortowanie wiadomoÅ›ci wg. czasu ich utworzenia
+	 * ¸Ş½ÃÁö¸¦ Á¤·Ä ÇÒ ¼öÀÖ´Â ¸Ş¼Òµå
 	 */
 	public int compareTo(Message o) 
 	{

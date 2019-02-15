@@ -3,57 +3,52 @@ package pl.slusarczyk.ignacy.CommunicatorServer.model;
 import java.io.Serializable;
 import java.util.HashSet;
 
-/** 
- * Klasa reprezentuj훳ca jeden pok처j chatu, zawieraj훳ca zbi처r u탉ytkownik처w danego pokoju oraz jego nazw휌
- *
- * @author Ignacy 힃lusarczyk
+/**
+ * 방에있는 사용자 집합과 그 이름을 포함하는 하나의 방을 나타내는 클래스
  */
-class Room implements Serializable
-{
+class Room implements Serializable {
 	private static final long serialVersionUID = 1L;
-	/**Nazwa danego pokoju chatu*/
+	/** roomName */
 	private String roomName;
-	/**Lista obiekt처w klasy User*/
+	/** listOfUsers */
 	private HashSet<User> listOfUsers;
-	
-	/**Konstruktor tworz훳cy nowy pok처j na podstawie nazwy pokoju oraz nazwy u탉ytkownika, kt처ry ten pok처j za흢o탉y흢
+
+	/**
+	 * 방의 이름과이 방을 가진 사용자의 이름을 기반으로 새 방을 만드는 생성자
 	 * 
-	 * @param roomName Nazwa pokoju
-	 * @param firstUserName Nazwa u탉ytkownika zak흢adaj훳cego pok처j
+	 * @param roomName     
+	 * @param userId
 	 */
-	public Room (final String roomName,final UserId userId)
-	{
+	public Room(final String roomName, final UserId userId) {
 		this.roomName = roomName;
 		listOfUsers = new HashSet<User>();
 		listOfUsers.add(new User(userId));
 	}
-	
+
 	/**
-	 * Metoda zwracaj훳ca zbi처r u탉ytkownik처w danego pokoju
+	 * 사용자의 리스트를 반환
 	 * 
-	 * @return zbi처r u탉ytkownik처w pokoju
+	 * @return listOfUsers
 	 */
-	public HashSet<User> getUserList()
-	{
+	public HashSet<User> getUserList() {
 		return listOfUsers;
 	}
-	
+
 	/**
-	 * Metoda zwracaj훳ca nazw휌 pokoju
+	 * 방 이름을 반환
 	 * 
-	 * @return nazwa pokoju
+	 * @return roomName
 	 */
-	public String getRoomName ()
-	{
+	public String getRoomName() {
 		return roomName;
 	}
-		
-	/** Metoda dodaj휌 u탉ytkownika o zadanym imieniu do pokoju
+
+	/**
+	 * 지정된 이름의 사용자를 방에 추가
 	 * 
-	 * @param userName Nazwa u탉ytkownika kt처rego dodajemy
+	 * @param userName
 	 */
-	public void addUser (final UserId userId)
-	{
+	public void addUser(final UserId userId) {
 		User newUser = new User(userId);
 		listOfUsers.add(newUser);
 	}

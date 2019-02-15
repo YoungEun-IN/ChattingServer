@@ -3,58 +3,48 @@ package pl.slusarczyk.ignacy.CommunicatorServer.model;
 import java.io.Serializable;
 
 /**
- * Klasa opakowuj훳ca nazw휌 u탉ytkownika impelmentuj훳ca metody equals oraz hashCode.
- * 
- * @author Ignacy 힃lusarczyk
+ * equals 메서드와 hashCode 메서드를 포함한 사용자의 이름을 래핑하는 클래스
  */
-public class UserId implements Serializable
-{
+public class UserId implements Serializable {
 	private static final long serialVersionUID = 1L;
-	/**Nazwa u탉ytkownika*/
+	/** userName */
 	private final String userName;
-	
+
 	/**
-	 * Konstruktor tworz훳cy obiekt na podstawie zadanego parametru
+	 * 지정된 파라미터에 근거 해 오브젝트를 생성하는 생성자
 	 * 
-	 * @param userName Nazwa u탉ytownika
+	 * @param userName
 	 */
-	public UserId(final String userName)
-	{
+	public UserId(final String userName) {
 		this.userName = userName;
 	}
-	
+
 	@Override
-	public boolean equals(Object other) 
-	{
-		if(other == null)
-		{
+	public boolean equals(Object other) {
+		if (other == null) {
 			return false;
 		}
-		
-		if(!(other instanceof UserId))
-		{
+
+		if (!(other instanceof UserId)) {
 			return false;
 		}
-		
+
 		UserId otherUserId = (UserId) other;
 		String otherUserName = otherUserId.getUserName();
 		return userName.equals(otherUserName);
 	}
-	
-	
+
 	@Override
-	public int hashCode() 
-	{
+	public int hashCode() {
 		return userName.hashCode();
 	}
-	
+
 	/**
-	 * Metoda zwracaj훳ca nazw휌 u탉ytkownika z ID, potrzebna przy opakowywniu userId w UserIdData, nie udost휌pniana klientowi
+	 * ID로 사용자 이름을 반환하는 메서드
 	 * 
 	 * @return user name
 	 */
-	public String getUserName()
-	{
+	public String getUserName() {
 		return userName;
 	}
 }
