@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandeledEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 
 /**
@@ -20,7 +20,7 @@ class ServerSocketHandler extends Thread
 	/**Socket servera*/
 	private final ServerSocket serverSocket;
 	/**Kolejka blokująca zdarzeń*/
-	private final BlockingQueue<ServerHandeledEvent> eventQueue;
+	private final BlockingQueue<ServerHandledEvent> eventQueue;
 	/**Mapa użytkowników i ich output streamów*/
 	private final HashMap <UserId,ObjectOutputStream> userOutputStreams;
 	
@@ -31,7 +31,7 @@ class ServerSocketHandler extends Thread
 	 * @param eventQueue kolejka zdarzeń
 	 * @param userOutputStreams mapa strumieni wyjściowych użytkowników
 	 */
-	public ServerSocketHandler(final ServerSocket serverSocket, final BlockingQueue<ServerHandeledEvent> eventQueue,final HashMap <UserId,ObjectOutputStream> userOutputStreams)
+	public ServerSocketHandler(final ServerSocket serverSocket, final BlockingQueue<ServerHandledEvent> eventQueue,final HashMap <UserId,ObjectOutputStream> userOutputStreams)
 	{
 		this.serverSocket = serverSocket;
 		this.eventQueue = eventQueue;

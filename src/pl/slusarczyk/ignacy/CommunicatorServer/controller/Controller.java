@@ -8,7 +8,7 @@ import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoom
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.NewMessage;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandeledEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.connection.MainConnectionHandler;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.Model;
@@ -22,11 +22,11 @@ import pl.slusarczyk.ignacy.CommunicatorServer.model.Model;
 public class Controller 
 {
 	/**Kolejka blokująca*/
-	private final BlockingQueue<ServerHandeledEvent> eventQueue;
+	private final BlockingQueue<ServerHandledEvent> eventQueue;
 	/**Referencja do modelu*/
 	private final Model model;
 	/**Mapa strategii obsługi zdarzeń*/
-	private final Map<Class<? extends ServerHandeledEvent>, clientEventStrategy> strategyMap;
+	private final Map<Class<? extends ServerHandledEvent>, clientEventStrategy> strategyMap;
 	/**Referencja do Servera*/
 	private final MainConnectionHandler mainConnectionHandler;
 	
@@ -37,14 +37,14 @@ public class Controller
 	 * @param model model
 	 * @param mainConnectionHandler serwer
 	 */
-	public Controller(final BlockingQueue<ServerHandeledEvent>  eventQueue, final Model model, final MainConnectionHandler mainConnectionHandler)
+	public Controller(final BlockingQueue<ServerHandledEvent>  eventQueue, final Model model, final MainConnectionHandler mainConnectionHandler)
 	{
 		this.eventQueue = eventQueue;
 		this.model = model;
 		this.mainConnectionHandler = mainConnectionHandler;
 		
 		//Tworzenie mapy strategii obsługi zdarzeń
-		strategyMap = new HashMap<Class<? extends ServerHandeledEvent>, clientEventStrategy>();
+		strategyMap = new HashMap<Class<? extends ServerHandledEvent>, clientEventStrategy>();
 		strategyMap.put(CreateNewRoom.class, new CreateNewRoomStrategy());
 		strategyMap.put(JoinExistingRoom.class, new JoinExistingRoomStrategy());
 		strategyMap.put(NewMessage.class, new NewMessageStrategy());	
@@ -60,7 +60,7 @@ public class Controller
 			{
 				try
 				{
-					ServerHandeledEvent serverHandeledEvent = eventQueue.take();
+					ServerHandledEvent serverHandeledEvent = eventQueue.take();
 					clientEventStrategy applicationEventStrategy = strategyMap.get(serverHandeledEvent.getClass());
 					applicationEventStrategy.execute(serverHandeledEvent);
 				}
@@ -83,7 +83,7 @@ public class Controller
 			 * 
 			 * @param applicationEvent zdarzenie aplikacji które musi zostać obsłużone
 			 */
-			abstract void execute(final ServerHandeledEvent applicationEvent);
+			abstract void execute(final ServerHandledEvent applicationEvent);
 		}
 		
 		/**
@@ -93,7 +93,7 @@ public class Controller
 		 */
 		class CreateNewRoomStrategy extends clientEventStrategy
 		{
-			void execute(final ServerHandeledEvent applicationEventObject)
+			void execute(final ServerHandledEvent applicationEventObject)
 			{
 				CreateNewRoom createNewRoom = (CreateNewRoom) applicationEventObject;
 				if (model.createNewRoom(createNewRoom))
@@ -114,7 +114,7 @@ public class Controller
 		 */
 		class JoinExistingRoomStrategy extends clientEventStrategy
 		{
-			void execute(final ServerHandeledEvent applicationEventObject)
+			void execute(final ServerHandledEvent applicationEventObject)
 			{
 				JoinExistingRoom joinExistingRoom = (JoinExistingRoom) applicationEventObject;	
 				if(model.addUserToSpecificRoom(joinExistingRoom) == true)
@@ -135,7 +135,7 @@ public class Controller
 		 */
 		class NewMessageStrategy extends clientEventStrategy
 		{
-			void execute(final ServerHandeledEvent applicationEventObject)
+			void execute(final ServerHandledEvent applicationEventObject)
 			{
 				NewMessage newMessage = (NewMessage) applicationEventObject;
 				model.addMessageOfUser(newMessage);
@@ -150,7 +150,7 @@ public class Controller
 		 */
 		class ClientLeftRoomStrategy extends clientEventStrategy
 		{
-			void execute(final ServerHandeledEvent applicationEventObject) 
+			void execute(final ServerHandledEvent applicationEventObject) 
 			{
 				ClientLeftRoom clientLeftRoom = (ClientLeftRoom) applicationEventObject;
 				model.setUserToInactive(clientLeftRoom);

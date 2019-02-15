@@ -6,7 +6,7 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandeledEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.ConnectionEstablishedServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.ConversationServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
@@ -29,7 +29,7 @@ public class MainConnectionHandler
 	/**Port na którym serwer nasłuchuje*/
 	private final int portNumber;
 	/**Kolejka bloująca zdarzeń*/
-	private final BlockingQueue<ServerHandeledEvent> eventQueue; 
+	private final BlockingQueue<ServerHandledEvent> eventQueue; 
 	
 	/**
 	 * Konstruktor włączający serwer na podanym porcie, który tworzy oddzielny wątek do nasłuchiwania nowych połączeń
@@ -37,7 +37,7 @@ public class MainConnectionHandler
 	 * @param portNumber numer portu
 	 * @param eventQueue kolejka blokująca zdarzeń
 	 */
-	public MainConnectionHandler (final int portNumber, final BlockingQueue<ServerHandeledEvent> eventQueueObject)
+	public MainConnectionHandler (final int portNumber, final BlockingQueue<ServerHandledEvent> eventQueueObject)
 	{
 		this.eventQueue = eventQueueObject;
 		this.portNumber = portNumber;

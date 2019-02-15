@@ -10,7 +10,7 @@ import java.util.concurrent.BlockingQueue;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandeledEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 
@@ -29,7 +29,7 @@ public class UserConnectionHandler extends Thread
 	/**Mapa ID userów oraz ich strumieni wyjściowych*/
 	 private final HashMap<UserId,ObjectOutputStream> userOutputStreams;
 	/**Kolejka blokująca zdarzeń*/
-	 private final BlockingQueue<ServerHandeledEvent> eventQueue;
+	 private final BlockingQueue<ServerHandledEvent> eventQueue;
 	 /**Flaga określająca czy wątek pracuje*/
 	 private boolean running;
 	
@@ -40,7 +40,7 @@ public class UserConnectionHandler extends Thread
 	 * @param eventQueue kolejka zdarzeń
 	 * @param userOutputStreams mapa strumieni wyjściowych
 	 */
-	public UserConnectionHandler (final Socket userSocket,final BlockingQueue<ServerHandeledEvent> eventQueue,final HashMap <UserId,ObjectOutputStream> userOutputStreams)
+	public UserConnectionHandler (final Socket userSocket,final BlockingQueue<ServerHandledEvent> eventQueue,final HashMap <UserId,ObjectOutputStream> userOutputStreams)
 	{
 		this.userSocket = userSocket;
 		this.eventQueue = eventQueue;
@@ -64,12 +64,12 @@ public class UserConnectionHandler extends Thread
 	 */
 		public void run()
 		{
-			ServerHandeledEvent appEvent;
+			ServerHandledEvent appEvent;
 			while(running)
 			{	
 				try
 				{
-					appEvent = (ServerHandeledEvent) inputStream.readObject();
+					appEvent = (ServerHandledEvent) inputStream.readObject();
 			
 					/**W przypadku kiedy od klienta przychodzi żądanie dołączenia do pokoju lub jego utworzenia musimy zapisać jego strumień wyjściowy*/
 					if (appEvent instanceof CreateNewRoom) 
