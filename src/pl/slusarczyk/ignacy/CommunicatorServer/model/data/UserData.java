@@ -44,7 +44,7 @@ public class UserData implements Serializable {
 	 * 
 	 * @return isActive
 	 */
-	public boolean isUserActive() {
+	public boolean isActive() {
 		return isActive;
 	}
 }

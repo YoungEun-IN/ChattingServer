@@ -9,7 +9,7 @@ import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRo
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.NewMessage;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.connection.MainConnectionHandler;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.Model;
 
@@ -82,7 +82,7 @@ public class Controller {
 			if (model.createNewRoom(newRoom)) {
 				mainConnectionHandler.assertConnectionEstablished(newRoom.getUserIdData(), true, newRoom.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new MessageServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", newRoom.getUserIdData()));
+				mainConnectionHandler.sendMessage(new InfoServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", newRoom.getUserIdData()));
 			}
 		}
 	}
@@ -96,7 +96,7 @@ public class Controller {
 			if (model.addUserToSpecificRoom(joinExistingRoomInformation) == true) {
 				mainConnectionHandler.assertConnectionEstablished(joinExistingRoomInformation.getUserIdData(), true, joinExistingRoomInformation.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new MessageServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomInformation.getUserIdData()));
+				mainConnectionHandler.sendMessage(new InfoServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomInformation.getUserIdData()));
 			}
 		}
 	}

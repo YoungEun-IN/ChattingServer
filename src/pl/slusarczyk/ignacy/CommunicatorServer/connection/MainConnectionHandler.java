@@ -9,7 +9,7 @@ import java.util.concurrent.BlockingQueue;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.ConnectionEstablishedServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.ConversationServerEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
@@ -63,7 +63,7 @@ public class MainConnectionHandler {
 	 */
 	public void sendMessageToAll(final RoomData roomData) {
 		for (UserData userData : roomData.getUserSet()) {
-			if (userData.isUserActive()) {
+			if (userData.isActive()) {
 				sendDirectMessage(userData.getUserIdData(), roomData);
 			}
 		}
@@ -104,7 +104,7 @@ public class MainConnectionHandler {
 	 * 
 	 * @param messageObject 표시 할 메시지와 정보 메시지를 보내는 사용자의 닉네임 포함
 	 */
-	public void sendMessage(MessageServerEvent messageObject) {
+	public void sendMessage(InfoServerEvent messageObject) {
 		try {
 			userOutputStreams.get(new UserId(messageObject.getUserIDData().getUserName())).writeObject(messageObject);
 			userOutputStreams.remove(new UserId(messageObject.getUserIDData().getUserName()));

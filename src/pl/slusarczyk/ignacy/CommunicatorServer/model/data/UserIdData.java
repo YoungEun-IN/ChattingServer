@@ -10,11 +10,11 @@ import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 public class UserIdData implements Serializable {
 	private static final long serialVersionUID = 1L;
 	
-	/** userNameToDisplay */
+	/** userName */
 	private final String userName;
 
 	/**
-	 * 지정된 파라미터에 근거 해 오브젝트를 생성하는 생성자
+	 * 지정된 파라미터에 근거해 오브젝트를 생성하는 생성자
 	 * 
 	 * @param userId
 	 */

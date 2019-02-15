@@ -11,7 +11,7 @@ import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoom
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 
 /**
@@ -68,7 +68,7 @@ public class UserConnectionHandler extends Thread {
 
 					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
 					if (userOutputStreams.get(new UserId(createNewRoomInformation.getUserIdData().getUserName())) != null) {
-						outputStream.writeObject(new MessageServerEvent("주어진 이름의 사용자가 이미 있습니다.", createNewRoomInformation.getUserIdData()));
+						outputStream.writeObject(new InfoServerEvent("주어진 이름의 사용자가 이미 있습니다.", createNewRoomInformation.getUserIdData()));
 					}
 					/** 존재하지 않으면 맵에 추가합니다. */
 					else {
@@ -80,7 +80,7 @@ public class UserConnectionHandler extends Thread {
 
 					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
 					if (userOutputStreams.get(new UserId(joinNewRoomInformation.getUserIdData().getUserName())) != null) {
-						outputStream.writeObject(new MessageServerEvent("주어진 이름의 사용자가 이미 있습니다.", joinNewRoomInformation.getUserIdData()));
+						outputStream.writeObject(new InfoServerEvent("주어진 이름의 사용자가 이미 있습니다.", joinNewRoomInformation.getUserIdData()));
 					} else {
 						/** 존재하지 않으면 맵에 추가합니다. */
 						userOutputStreams.put(new UserId(joinNewRoomInformation.getUserIdData().getUserName()), outputStream);
