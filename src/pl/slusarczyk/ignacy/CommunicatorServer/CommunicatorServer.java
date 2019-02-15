@@ -9,11 +9,12 @@ import pl.slusarczyk.ignacy.CommunicatorServer.controller.Controller;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.Model;
 
 /**
- * 기본 응용 프로그램 클래스는 모든 구성 요소의 적절한 초기화를 담당합니다.
+ * 모든 구성 요소의 적절한 초기화를 담당
  */
 public class CommunicatorServer {
 	/**
-	 * 새로운 애플리케이션 메소드는 모델, 이벤트 큐 및 컨트롤러를 생성합니다.
+	 * 모델, 이벤트 큐 및 컨트롤러를 생성
+	 * @param args 
 	 */
 	public static void main(String args[]) {
 		BlockingQueue<ServerHandledEvent> eventQueue = new LinkedBlockingQueue<ServerHandledEvent>();

@@ -9,8 +9,9 @@ import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
  */
 public class UserIdData implements Serializable {
 	private static final long serialVersionUID = 1L;
+	
 	/** userNameToDisplay */
-	private final String userNameToDisplay;
+	private final String userName;
 
 	/**
 	 * 지정된 파라미터에 근거 해 오브젝트를 생성하는 생성자
@@ -18,7 +19,7 @@ public class UserIdData implements Serializable {
 	 * @param userId
 	 */
 	public UserIdData(final UserId userId) {
-		this.userNameToDisplay = userId.getUserName();
+		this.userName = userId.getUserName();
 	}
 
 	@Override
@@ -33,7 +34,7 @@ public class UserIdData implements Serializable {
 
 		UserIdData otherUserId = (UserIdData) other;
 		String otherUserName = otherUserId.getUserName();
-		return this.userNameToDisplay.equals(otherUserName);
+		return this.userName.equals(otherUserName);
 	}
 
 	/**
@@ -42,6 +43,6 @@ public class UserIdData implements Serializable {
 	 * @return userName
 	 */
 	public String getUserName() {
-		return userNameToDisplay;
+		return userName;
 	}
 }
