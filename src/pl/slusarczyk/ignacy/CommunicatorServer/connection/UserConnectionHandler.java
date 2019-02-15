@@ -7,9 +7,9 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoomEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
@@ -48,7 +48,7 @@ public class UserConnectionHandler extends Thread {
 			outputStream = new ObjectOutputStream(userSocket.getOutputStream());
 			inputStream = new ObjectInputStream(userSocket.getInputStream());
 		} catch (IOException ex) {
-			System.err.println("클라이언트와 함께 스트림을 생성 할 때 예외 발생. " + ex);
+			System.err.println("클라이언트 스트림을 생성 할 때 예외 발생. " + ex);
 			return;
 		}
 	}
@@ -62,9 +62,9 @@ public class UserConnectionHandler extends Thread {
 			try {
 				appEvent = (ServerHandledEvent) inputStream.readObject();
 
-				/** 클라이언트가 방에 들어 오거나 방을 만들 때, 출력 스트림을 작성해야합니다. */
-				if (appEvent instanceof CreateNewRoom) {
-					CreateNewRoom createNewRoomInformation = (CreateNewRoom) appEvent;
+				/** 클라이언트가 방에 들어 오거나 방을 만들 때, 출력 스트림을 작성 */
+				if (appEvent instanceof CreateNewRoomEvent) {
+					CreateNewRoomEvent createNewRoomInformation = (CreateNewRoomEvent) appEvent;
 
 					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
 					if (userOutputStreams.get(new UserId(createNewRoomInformation.getUserIdData().getUserName())) != null) {
@@ -75,8 +75,8 @@ public class UserConnectionHandler extends Thread {
 						userOutputStreams.put(new UserId(createNewRoomInformation.getUserIdData().getUserName()), outputStream);
 						eventQueue.add(appEvent);
 					}
-				} else if (appEvent instanceof JoinExistingRoom) {
-					JoinExistingRoom joinNewRoomInformation = (JoinExistingRoom) appEvent;
+				} else if (appEvent instanceof JoinExistingRoomEvent) {
+					JoinExistingRoomEvent joinNewRoomInformation = (JoinExistingRoomEvent) appEvent;
 
 					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
 					if (userOutputStreams.get(new UserId(joinNewRoomInformation.getUserIdData().getUserName())) != null) {
@@ -90,7 +90,7 @@ public class UserConnectionHandler extends Thread {
 				/**
 				 * 채팅에서 사람의 출구를 나타내는 객체를 얻는다면 우리는 멈추고 컨트롤러에 이벤트를 보내야합니다.
 				 */
-				else if (appEvent instanceof ClientLeftRoom) {
+				else if (appEvent instanceof ClientLeftRoomEvent) {
 					eventQueue.add(appEvent);
 					userSocket.close();
 					isRunning = false;

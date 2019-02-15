@@ -3,7 +3,7 @@ package pl.slusarczyk.ignacy.CommunicatorServer.model;
 import java.util.Date;
 import java.util.HashSet;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.NewMessage;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.SendMessageEvent;
 
 /**
  * User 클래스는 특정 사용자에 대한 모든 정보를 포함합니다. 이 정보는 userId와 그에 의해 보내지는 모든 메시지를 나타내는 메시지
@@ -53,7 +53,7 @@ class User {
 	 * @param textMessage
 	 * @param timestamp
 	 */
-	public void addMessage(final NewMessage newMessage, final Date timestamp) {
+	public void addMessage(final SendMessageEvent newMessage, final Date timestamp) {
 		messageHistory.add(new Message(newMessage.getMessage(), timestamp));
 	}
 

@@ -3,10 +3,10 @@ package pl.slusarczyk.ignacy.CommunicatorServer.model;
 import java.util.Calendar;
 import java.util.HashSet;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.NewMessage;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.SendMessageEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.MessageData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
@@ -31,7 +31,7 @@ public class Model {
 	 * 
 	 * @param createNewRoom
 	 */
-	public boolean createNewRoom(final CreateNewRoom createNewRoom) {
+	public boolean createNewRoom(final CreateNewRoomEvent createNewRoom) {
 		for (Room room : roomList) {
 			if (room.getRoomName().equals(createNewRoom.getRoomName())) {
 				return false;
@@ -47,7 +47,7 @@ public class Model {
 	 * 
 	 * @param joinExistingRoom
 	 */
-	public boolean addUserToSpecificRoom(final JoinExistingRoom joinExistingRoom) {
+	public boolean addUserToSpecificRoom(final JoinExistingRoomEvent joinExistingRoom) {
 		for (Room room : roomList) {
 			if (joinExistingRoom.getRoomName().equals(room.getRoomName())) {
 				room.addUser(new UserId(joinExistingRoom.getUserIdData().getUserName()));
@@ -62,7 +62,7 @@ public class Model {
 	 * 
 	 * @param neMessage
 	 */
-	public void addMessageOfUser(final NewMessage newMessage) {
+	public void addMessageOfUser(final SendMessageEvent newMessage) {
 		for (Room room : roomList) {
 			if (newMessage.getRoomName().equals(room.getRoomName())) {
 				for (User user : room.getUserList()) {
@@ -81,7 +81,7 @@ public class Model {
 	 * 
 	 * @return RoomData Object
 	 */
-	public RoomData getRoomDataFromRoom(final NewMessage newMessageObject) {
+	public RoomData getRoomDataFromRoom(final SendMessageEvent newMessageObject) {
 		HashSet<UserData> userSet = new HashSet<UserData>();
 
 		for (Room room : roomList) {
@@ -105,7 +105,7 @@ public class Model {
 	 * 
 	 * @param clientLeftRoom
 	 */
-	public void setUserToInactive(ClientLeftRoom clientLeftRoom) {
+	public void setUserToInactive(ClientLeftRoomEvent clientLeftRoom) {
 		for (Room room : roomList) {
 			if (room.getRoomName().equals(clientLeftRoom.getRoomName())) {
 				for (User user : room.getUserList()) {

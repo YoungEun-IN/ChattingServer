@@ -4,10 +4,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoom;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.NewMessage;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoom;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.SendMessageEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoomEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.connection.MainConnectionHandler;
@@ -40,10 +40,10 @@ public class Controller {
 
 		// 이벤트 처리 정책 맵 작성
 		strategyMap = new HashMap<Class<? extends ServerHandledEvent>, ClientEventStrategy>();
-		strategyMap.put(CreateNewRoom.class, new CreateNewRoomStrategy());
-		strategyMap.put(JoinExistingRoom.class, new JoinExistingRoomStrategy());
-		strategyMap.put(NewMessage.class, new NewMessageStrategy());
-		strategyMap.put(ClientLeftRoom.class, new ClientLeftRoomStrategy());
+		strategyMap.put(CreateNewRoomEvent.class, new CreateNewRoomStrategy());
+		strategyMap.put(JoinExistingRoomEvent.class, new JoinExistingRoomStrategy());
+		strategyMap.put(SendMessageEvent.class, new NewMessageStrategy());
+		strategyMap.put(ClientLeftRoomEvent.class, new ClientLeftRoomStrategy());
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class Controller {
 	 */
 	class CreateNewRoomStrategy extends ClientEventStrategy {
 		void execute(final ServerHandledEvent applicationEventObject) {
-			CreateNewRoom newRoom = (CreateNewRoom) applicationEventObject;
+			CreateNewRoomEvent newRoom = (CreateNewRoomEvent) applicationEventObject;
 			if (model.createNewRoom(newRoom)) {
 				mainConnectionHandler.assertConnectionEstablished(newRoom.getUserIdData(), true, newRoom.getRoomName());
 			} else {
@@ -92,7 +92,7 @@ public class Controller {
 	 */
 	class JoinExistingRoomStrategy extends ClientEventStrategy {
 		void execute(final ServerHandledEvent applicationEventObject) {
-			JoinExistingRoom joinExistingRoomInformation = (JoinExistingRoom) applicationEventObject;
+			JoinExistingRoomEvent joinExistingRoomInformation = (JoinExistingRoomEvent) applicationEventObject;
 			if (model.addUserToSpecificRoom(joinExistingRoomInformation) == true) {
 				mainConnectionHandler.assertConnectionEstablished(joinExistingRoomInformation.getUserIdData(), true, joinExistingRoomInformation.getRoomName());
 			} else {
@@ -106,7 +106,7 @@ public class Controller {
 	 */
 	class NewMessageStrategy extends ClientEventStrategy {
 		void execute(final ServerHandledEvent applicationEventObject) {
-			NewMessage newMessageInformation = (NewMessage) applicationEventObject;
+			SendMessageEvent newMessageInformation = (SendMessageEvent) applicationEventObject;
 			model.addMessageOfUser(newMessageInformation);
 			mainConnectionHandler.sendMessageToAll(model.getRoomDataFromRoom(newMessageInformation));
 		}
@@ -117,7 +117,7 @@ public class Controller {
 	 */
 	class ClientLeftRoomStrategy extends ClientEventStrategy {
 		void execute(final ServerHandledEvent applicationEventObject) {
-			ClientLeftRoom clientLeftRoomInformation = (ClientLeftRoom) applicationEventObject;
+			ClientLeftRoomEvent clientLeftRoomInformation = (ClientLeftRoomEvent) applicationEventObject;
 			model.setUserToInactive(clientLeftRoomInformation);
 		}
 	}
