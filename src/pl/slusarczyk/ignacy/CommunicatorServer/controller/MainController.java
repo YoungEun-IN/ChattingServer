@@ -11,16 +11,16 @@ import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoomE
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.connection.MainConnectionHandler;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.Model;
+import pl.slusarczyk.ignacy.CommunicatorServer.model.UserActionProcessor;
 
 /**
- * 클라이언트와 서버 간의 적절한 통신을 담당하는 컨트롤러 클래스. 클라이언트의 고객 서비스 전략에 해당하는 클래스 포함
+ * 클라이언트와 서버 간의 적절한 통신을 담당하는 컨트롤러 클래스.
  */
-public class Controller {
+public class MainController {
 	/** 이벤트 큐 */
 	private final BlockingQueue<ServerHandledEvent> eventQueue;
 	/** 모델 */
-	private final Model model;
+	private final UserActionProcessor userActionProcessor;
 	/** 이벤트 처리 전략 맵 */
 	private final Map<Class<? extends ServerHandledEvent>, ClientEventStrategy> strategyMap;
 	/** 서버에 대한 참조 */
@@ -30,12 +30,12 @@ public class Controller {
 	 * 지정된 매개 변수를 기반으로 컨트롤을 만드는 생성자
 	 * 
 	 * @param eventQueue
-	 * @param model
+	 * @param userActionProcessor
 	 * @param mainConnectionHandler 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
 	 */
-	public Controller(final BlockingQueue<ServerHandledEvent> eventQueue, final Model model, final MainConnectionHandler mainConnectionHandler) {
+	public MainController(final BlockingQueue<ServerHandledEvent> eventQueue, final UserActionProcessor userActionProcessor, final MainConnectionHandler mainConnectionHandler) {
 		this.eventQueue = eventQueue;
-		this.model = model;
+		this.userActionProcessor = userActionProcessor;
 		this.mainConnectionHandler = mainConnectionHandler;
 
 		// 이벤트 처리 정책 맵 작성
@@ -77,12 +77,12 @@ public class Controller {
 	 * 새 방을 만들어 사용자를 운영하는 전략을 설명하는 내부 클래스입니다.
 	 */
 	class CreateNewRoomStrategy extends ClientEventStrategy {
-		void execute(final ServerHandledEvent applicationEventObject) {
-			CreateNewRoomEvent newRoom = (CreateNewRoomEvent) applicationEventObject;
-			if (model.createNewRoom(newRoom)) {
-				mainConnectionHandler.assertConnectionEstablished(newRoom.getUserIdData(), true, newRoom.getRoomName());
+		void execute(final ServerHandledEvent serverHandledEvent) {
+			CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) serverHandledEvent;
+			if (userActionProcessor.createNewRoom(createNewRoomEvent)) {
+				mainConnectionHandler.assertConnectionEstablished(createNewRoomEvent.getUserIdData(), true, createNewRoomEvent.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new InfoServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", newRoom.getUserIdData()));
+				mainConnectionHandler.sendMessage(new InfoServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserIdData()));
 			}
 		}
 	}
@@ -91,12 +91,12 @@ public class Controller {
 	 * 기존 방에 합류하기위한 사용자 지원 전략을 설명하는 내부 클래스입니다.
 	 */
 	class JoinExistingRoomStrategy extends ClientEventStrategy {
-		void execute(final ServerHandledEvent applicationEventObject) {
-			JoinExistingRoomEvent joinExistingRoomInformation = (JoinExistingRoomEvent) applicationEventObject;
-			if (model.addUserToSpecificRoom(joinExistingRoomInformation) == true) {
-				mainConnectionHandler.assertConnectionEstablished(joinExistingRoomInformation.getUserIdData(), true, joinExistingRoomInformation.getRoomName());
+		void execute(final ServerHandledEvent serverHandledEvent) {
+			JoinExistingRoomEvent joinExistingRoomEvent = (JoinExistingRoomEvent) serverHandledEvent;
+			if (userActionProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
+				mainConnectionHandler.assertConnectionEstablished(joinExistingRoomEvent.getUserIdData(), true, joinExistingRoomEvent.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new InfoServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomInformation.getUserIdData()));
+				mainConnectionHandler.sendMessage(new InfoServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserIdData()));
 			}
 		}
 	}
@@ -105,10 +105,10 @@ public class Controller {
 	 * 사용자가 새 메시지를 보내는 서비스 전략을 설명하는 내부 클래스
 	 */
 	class NewMessageStrategy extends ClientEventStrategy {
-		void execute(final ServerHandledEvent applicationEventObject) {
-			SendMessageEvent newMessageInformation = (SendMessageEvent) applicationEventObject;
-			model.addMessageOfUser(newMessageInformation);
-			mainConnectionHandler.sendMessageToAll(model.getRoomDataFromRoom(newMessageInformation));
+		void execute(final ServerHandledEvent serverHandledEvent) {
+			SendMessageEvent newMessageInformation = (SendMessageEvent) serverHandledEvent;
+			userActionProcessor.addMessageOfUser(newMessageInformation);
+			mainConnectionHandler.sendMessageToAll(userActionProcessor.getRoomData(newMessageInformation));
 		}
 	}
 
@@ -116,9 +116,9 @@ public class Controller {
 	 * 방의 사용자의 이탈 전략을 설명하는 내부 클래스입니다.
 	 */
 	class ClientLeftRoomStrategy extends ClientEventStrategy {
-		void execute(final ServerHandledEvent applicationEventObject) {
-			ClientLeftRoomEvent clientLeftRoomInformation = (ClientLeftRoomEvent) applicationEventObject;
-			model.setUserToInactive(clientLeftRoomInformation);
+		void execute(final ServerHandledEvent serverHandledEvent) {
+			ClientLeftRoomEvent clientLeftRoomInformation = (ClientLeftRoomEvent) serverHandledEvent;
+			userActionProcessor.setUserToInactive(clientLeftRoomInformation);
 		}
 	}
 }
