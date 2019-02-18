@@ -13,7 +13,7 @@ import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.MessageServerEv
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserIdData;
+import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserName;
 
 /**
  * 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
@@ -64,7 +64,7 @@ public class MainConnectionHandler {
 	public void sendMessageToAll(final RoomData roomData) {
 		for (UserData userData : roomData.getUserSet()) {
 			if (userData.isActive()) {
-				sendDirectMessage(userData.getUserIdData(), roomData);
+				sendDirectMessage(userData.getUserName(), roomData);
 			}
 		}
 	}
@@ -72,13 +72,13 @@ public class MainConnectionHandler {
 	/**
 	 * 주어진 닉네임을 가진 사용자에게 직접 메시지를 보내는 메소드
 	 * 
-	 * @param userIdData
+	 * @param userName
 	 * @param roomData
 	 */
-	private void sendDirectMessage(final UserIdData userIdData, final RoomData roomData) {
+	private void sendDirectMessage(final UserName userName, final RoomData roomData) {
 		try {
 			ConversationServerEvent conversationServerEvent = new ConversationServerEvent(roomData);
-			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(conversationServerEvent);
+			userOutputStreams.get(new UserId(userName.getUserName())).writeObject(conversationServerEvent);
 		} catch (IOException ex) {
 			System.err.println("직접 메시지 보낼 때 익셉션 발생. " + ex);
 		}
@@ -87,12 +87,12 @@ public class MainConnectionHandler {
 	/**
 	 * 방을 올바르게 만들거나 추가하기 위해 클라이언트에게 정보를 보내는 메소드
 	 * 
-	 * @param userIdData
+	 * @param userName
 	 * @param roomName
 	 */
-	public void sendMainChatViewInfo(final UserIdData userIdData, final String roomName) {
+	public void sendMainChatViewInfo(final UserName userName, final String roomName) {
 		try {
-			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new AfterConnectionServerEvent(userIdData, roomName));
+			userOutputStreams.get(new UserId(userName.getUserName())).writeObject(new AfterConnectionServerEvent(userName, roomName));
 		} catch (IOException e) {
 			System.err.println(e);
 		}
@@ -105,8 +105,8 @@ public class MainConnectionHandler {
 	 */
 	public void sendMessage(MessageServerEvent messageObject) {
 		try {
-			userOutputStreams.get(new UserId(messageObject.getUserIDData().getUserName())).writeObject(messageObject);
-			userOutputStreams.remove(new UserId(messageObject.getUserIDData().getUserName()));
+			userOutputStreams.get(new UserId(messageObject.getUserName().getUserName())).writeObject(messageObject);
+			userOutputStreams.remove(new UserId(messageObject.getUserName().getUserName()));
 		} catch (IOException ex) {
 			System.err.println("익셉션 발생. " + ex);
 		}

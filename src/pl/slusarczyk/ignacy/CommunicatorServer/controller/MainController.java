@@ -81,9 +81,9 @@ public class MainController {
 		void execute(final ServerHandledEvent serverHandledEvent) {
 			CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) serverHandledEvent;
 			if (userActionProcessor.createNewRoom(createNewRoomEvent)) {
-				mainConnectionHandler.sendMainChatViewInfo(createNewRoomEvent.getUserIdData(), createNewRoomEvent.getRoomName());
+				mainConnectionHandler.sendMainChatViewInfo(createNewRoomEvent.getUserName(), createNewRoomEvent.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new MessageServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserIdData()));
+				mainConnectionHandler.sendMessage(new MessageServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserName()));
 			}
 		}
 	}
@@ -95,9 +95,9 @@ public class MainController {
 		void execute(final ServerHandledEvent serverHandledEvent) {
 			JoinExistingRoomEvent joinExistingRoomEvent = (JoinExistingRoomEvent) serverHandledEvent;
 			if (userActionProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
-				mainConnectionHandler.sendMainChatViewInfo(joinExistingRoomEvent.getUserIdData(), joinExistingRoomEvent.getRoomName());
+				mainConnectionHandler.sendMainChatViewInfo(joinExistingRoomEvent.getUserName(), joinExistingRoomEvent.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new MessageServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserIdData()));
+				mainConnectionHandler.sendMessage(new MessageServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserName()));
 			}
 		}
 	}

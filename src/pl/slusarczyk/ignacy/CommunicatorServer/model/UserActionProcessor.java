@@ -10,7 +10,7 @@ import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.SendMessageEven
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.MessageData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserIdData;
+import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserName;
 
 /**
  * 전체 모델 인터페이스를 제공하는 클래스
@@ -38,7 +38,7 @@ public class UserActionProcessor {
 			}
 		}
 
-		roomList.add(new Room(createNewRoomEvent.getRoomName(), new UserId(createNewRoomEvent.getUserIdData().getUserName())));
+		roomList.add(new Room(createNewRoomEvent.getRoomName(), new UserId(createNewRoomEvent.getUserName().getUserName())));
 		return true;
 	}
 
@@ -50,7 +50,7 @@ public class UserActionProcessor {
 	public boolean addUserToSpecificRoom(final JoinExistingRoomEvent joinExistingRoomEvent) {
 		for (Room room : roomList) {
 			if (joinExistingRoomEvent.getRoomName().equals(room.getRoomName())) {
-				room.addUser(new UserId(joinExistingRoomEvent.getUserIdData().getUserName()));
+				room.addUser(new UserId(joinExistingRoomEvent.getUserName().getUserName()));
 				return true;
 			}
 		}
@@ -66,7 +66,7 @@ public class UserActionProcessor {
 		for (Room room : roomList) {
 			if (sendMessageEvent.getRoomName().equals(room.getRoomName())) {
 				for (User user : room.getUserList()) {
-					if (new UserId(sendMessageEvent.getUserIdData().getUserName()).equals(user.getUserID())) {
+					if (new UserId(sendMessageEvent.getUserName().getUserName()).equals(user.getUserID())) {
 						user.addMessage(sendMessageEvent, Calendar.getInstance().getTime());
 					}
 				}
@@ -91,7 +91,7 @@ public class UserActionProcessor {
 					for (Message message : user.getUserMessageHistory()) {
 						messagesOfUser.add(new MessageData(message.getMessage(), message.getDate()));
 					}
-					UserData userData = new UserData(new UserIdData(user.getUserID()), messagesOfUser, user.isActive());
+					UserData userData = new UserData(new UserName(user.getUserID()), messagesOfUser, user.isActive());
 					userSet.add(userData);
 				}
 				return new RoomData(userSet);
@@ -109,7 +109,7 @@ public class UserActionProcessor {
 		for (Room room : roomList) {
 			if (room.getRoomName().equals(clientLeftRoomEvent.getRoomName())) {
 				for (User user : room.getUserList()) {
-					if (user.getUserID().equals(new UserId(clientLeftRoomEvent.getUserIDData().getUserName()))) {
+					if (user.getUserID().equals(new UserId(clientLeftRoomEvent.getUserName().getUserName()))) {
 						user.setUserToInactive();
 					}
 				}
