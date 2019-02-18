@@ -1,28 +1,28 @@
-package pl.slusarczyk.ignacy.CommunicatorServer.model;
+package chattingServer.model;
 
 import java.util.Calendar;
 import java.util.HashSet;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.CreateNewRoomEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.JoinExistingRoomEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.QuitChattingEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.SendMessageEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.MessageData;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
+import chattingClient.serverHandleEvent.CreateNewRoomEvent;
+import chattingClient.serverHandleEvent.JoinExistingRoomEvent;
+import chattingClient.serverHandleEvent.QuitChattingEvent;
+import chattingClient.serverHandleEvent.SendMessageEvent;
+import chattingServer.model.data.MessageData;
+import chattingServer.model.data.RoomData;
+import chattingServer.model.data.UserData;
 
 /**
  * 전체 모델 인터페이스를 제공하는 클래스
  */
 public class UserActionProcessor {
 	/** 활성화된 룸 목록이 포함 된 세트 */
-	private final HashSet<Room> roomList;
+	private final HashSet<Room> roomSet;
 
 	/**
 	 * 생성자
 	 */
 	public UserActionProcessor() {
-		this.roomList = new HashSet<Room>();
+		this.roomSet = new HashSet<Room>();
 	}
 
 	/**
@@ -31,13 +31,13 @@ public class UserActionProcessor {
 	 * @param createNewRoomEvent
 	 */
 	public boolean createNewRoom(final CreateNewRoomEvent createNewRoomEvent) {
-		for (Room room : roomList) {
+		for (Room room : roomSet) {
 			if (room.getRoomName().equals(createNewRoomEvent.getRoomName())) {
 				return false;
 			}
 		}
 
-		roomList.add(new Room(createNewRoomEvent.getRoomName(), new UserId(createNewRoomEvent.getUserName())));
+		roomSet.add(new Room(createNewRoomEvent.getRoomName(), new UserId(createNewRoomEvent.getUserName())));
 		return true;
 	}
 
@@ -47,7 +47,7 @@ public class UserActionProcessor {
 	 * @param joinExistingRoomEvent
 	 */
 	public boolean addUserToSpecificRoom(final JoinExistingRoomEvent joinExistingRoomEvent) {
-		for (Room room : roomList) {
+		for (Room room : roomSet) {
 			if (joinExistingRoomEvent.getRoomName().equals(room.getRoomName())) {
 				room.addUser(new UserId(joinExistingRoomEvent.getUserName()));
 				return true;
@@ -59,12 +59,12 @@ public class UserActionProcessor {
 	/**
 	 * 사용자의 메시지 기록에 메시지를 추가하는 메소드
 	 * 
-	 * @param neMessage
+	 * @param sendMessageEvent
 	 */
 	public void addMessageOfUser(final SendMessageEvent sendMessageEvent) {
-		for (Room room : roomList) {
+		for (Room room : roomSet) {
 			if (sendMessageEvent.getRoomName().equals(room.getRoomName())) {
-				for (User user : room.getUserList()) {
+				for (User user : room.getUserSet()) {
 					if (new UserId(sendMessageEvent.getUserName()).equals(user.getUserID())) {
 						user.addMessage(sendMessageEvent, Calendar.getInstance().getTime());
 					}
@@ -76,16 +76,16 @@ public class UserActionProcessor {
 	/**
 	 * 새로운 메시지가 온 방의 세부 사항을 전달하는 메소드
 	 * 
-	 * @param newMessage
+	 * @param sendMessageEvent
 	 * 
-	 * @return RoomData Object
+	 * @return RoomData
 	 */
 	public RoomData getRoomData(final SendMessageEvent sendMessageEvent) {
 		HashSet<UserData> userSet = new HashSet<UserData>();
 
-		for (Room room : roomList) {
+		for (Room room : roomSet) {
 			if (sendMessageEvent.getRoomName().equals(room.getRoomName())) {
-				for (User user : room.getUserList()) {
+				for (User user : room.getUserSet()) {
 					HashSet<MessageData> messagesOfUser = new HashSet<MessageData>();
 					for (Message message : user.getUserMessageHistory()) {
 						messagesOfUser.add(new MessageData(message.getMessage(), message.getDate()));
@@ -102,13 +102,13 @@ public class UserActionProcessor {
 	/**
 	 * 사용자를 비활성으로 나타내는 메소드
 	 * 
-	 * @param clientLeftRoomEvent
+	 * @param quitChattingEvent
 	 */
-	public void setUserToInactive(QuitChattingEvent clientLeftRoomEvent) {
-		for (Room room : roomList) {
-			if (room.getRoomName().equals(clientLeftRoomEvent.getRoomName())) {
-				for (User user : room.getUserList()) {
-					if (user.getUserID().equals(new UserId(clientLeftRoomEvent.getUserName()))) {
+	public void setUserToInactive(QuitChattingEvent quitChattingEvent) {
+		for (Room room : roomSet) {
+			if (room.getRoomName().equals(quitChattingEvent.getRoomName())) {
+				for (User user : room.getUserSet()) {
+					if (user.getUserID().equals(new UserId(quitChattingEvent.getUserName()))) {
 						user.setUserToInactive();
 					}
 				}

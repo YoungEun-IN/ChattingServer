@@ -1,4 +1,4 @@
-package pl.slusarczyk.ignacy.CommunicatorServer.connection;
+package chattingServer.connection;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -8,8 +8,8 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
+import chattingClient.serverHandleEvent.ServerHandledEvent;
+import chattingServer.model.UserId;
 
 /**
  * 우리에게 책임지는 클래스는 서버가 클라이언트와 새로운 연결을 할 수있게합니다.

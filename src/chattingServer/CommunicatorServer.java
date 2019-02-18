@@ -1,12 +1,12 @@
-package pl.slusarczyk.ignacy.CommunicatorServer;
+package chattingServer;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.connection.MainConnectionHandler;
-import pl.slusarczyk.ignacy.CommunicatorServer.controller.MainController;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.UserActionProcessor;
+import chattingClient.serverHandleEvent.ServerHandledEvent;
+import chattingServer.connection.MainConnectionHandler;
+import chattingServer.controller.MainController;
+import chattingServer.model.UserActionProcessor;
 
 /**
  * 모든 구성 요소의 적절한 초기화를 담당

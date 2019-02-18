@@ -1,4 +1,4 @@
-package pl.slusarczyk.ignacy.CommunicatorServer.model;
+package chattingServer.model;
 
 import java.util.HashSet;
 
@@ -28,7 +28,7 @@ class Room {
 	 * 
 	 * @return listOfUsers
 	 */
-	public HashSet<User> getUserList() {
+	public HashSet<User> getUserSet() {
 		return listOfUsers;
 	}
 

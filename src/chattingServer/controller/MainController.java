@@ -1,17 +1,17 @@
-package pl.slusarczyk.ignacy.CommunicatorServer.controller;
+package chattingServer.controller;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.CreateNewRoomEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.JoinExistingRoomEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.QuitChattingEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.SendMessageEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.MessageServerEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.connection.MainConnectionHandler;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.UserActionProcessor;
+import chattingClient.serverHandleEvent.CreateNewRoomEvent;
+import chattingClient.serverHandleEvent.JoinExistingRoomEvent;
+import chattingClient.serverHandleEvent.QuitChattingEvent;
+import chattingClient.serverHandleEvent.SendMessageEvent;
+import chattingClient.serverHandleEvent.ServerHandledEvent;
+import chattingServer.clientHandleEvent.AlertToClientEvent;
+import chattingServer.connection.MainConnectionHandler;
+import chattingServer.model.UserActionProcessor;
 
 /**
  * 클라이언트와 서버 간의 적절한 통신을 담당하는 컨트롤러 클래스.
@@ -83,7 +83,7 @@ public class MainController {
 			if (userActionProcessor.createNewRoom(createNewRoomEvent)) {
 				mainConnectionHandler.sendMainChatViewInfo(createNewRoomEvent.getUserName(), createNewRoomEvent.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new MessageServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserName()));
+				mainConnectionHandler.sendMessage(new AlertToClientEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserName()));
 			}
 		}
 	}
@@ -97,7 +97,7 @@ public class MainController {
 			if (userActionProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
 				mainConnectionHandler.sendMainChatViewInfo(joinExistingRoomEvent.getUserName(), joinExistingRoomEvent.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new MessageServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserName()));
+				mainConnectionHandler.sendMessage(new AlertToClientEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserName()));
 			}
 		}
 	}

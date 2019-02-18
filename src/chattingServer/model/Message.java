@@ -1,4 +1,4 @@
-package pl.slusarczyk.ignacy.CommunicatorServer.model;
+package chattingServer.model;
 
 import java.util.Date;
 

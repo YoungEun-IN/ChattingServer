@@ -1,4 +1,4 @@
-package pl.slusarczyk.ignacy.CommunicatorServer.model;
+package chattingServer.model;
 
 /**
  * equals 메서드와 hashCode 메서드를 포함한 사용자의 이름을 래핑하는 클래스

@@ -1,4 +1,4 @@
-package pl.slusarczyk.ignacy.CommunicatorServer.connection;
+package chattingServer.connection;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -6,13 +6,13 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.AfterConnectionServerEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.ConversationServerEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.MessageServerEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
+import chattingClient.serverHandleEvent.ServerHandledEvent;
+import chattingServer.clientHandleEvent.ChatRoomViewBuildEvent;
+import chattingServer.clientHandleEvent.GiveChattingInfoEvent;
+import chattingServer.clientHandleEvent.AlertToClientEvent;
+import chattingServer.model.UserId;
+import chattingServer.model.data.RoomData;
+import chattingServer.model.data.UserData;
 
 /**
  * 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
@@ -76,8 +76,8 @@ public class MainConnectionHandler {
 	 */
 	private void sendDirectMessage(final String userName, final RoomData roomData) {
 		try {
-			ConversationServerEvent conversationServerEvent = new ConversationServerEvent(roomData);
-			userOutputStreams.get(new UserId(userName)).writeObject(conversationServerEvent);
+			GiveChattingInfoEvent giveChattingInfoEvent = new GiveChattingInfoEvent(roomData);
+			userOutputStreams.get(new UserId(userName)).writeObject(giveChattingInfoEvent);
 		} catch (IOException ex) {
 			System.err.println("직접 메시지 보낼 때 익셉션 발생. " + ex);
 		}
@@ -91,7 +91,7 @@ public class MainConnectionHandler {
 	 */
 	public void sendMainChatViewInfo(final String userName, final String roomName) {
 		try {
-			userOutputStreams.get(new UserId(userName)).writeObject(new AfterConnectionServerEvent(userName, roomName));
+			userOutputStreams.get(new UserId(userName)).writeObject(new ChatRoomViewBuildEvent(userName, roomName));
 		} catch (IOException e) {
 			System.err.println(e);
 		}
@@ -102,7 +102,7 @@ public class MainConnectionHandler {
 	 * 
 	 * @param messageObject
 	 */
-	public void sendMessage(MessageServerEvent messageObject) {
+	public void sendMessage(AlertToClientEvent messageObject) {
 		try {
 			userOutputStreams.get(new UserId(messageObject.getUserName())).writeObject(messageObject);
 			userOutputStreams.remove(new UserId(messageObject.getUserName()));
