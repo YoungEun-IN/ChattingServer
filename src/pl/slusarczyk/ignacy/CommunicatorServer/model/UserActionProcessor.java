@@ -3,9 +3,9 @@ package pl.slusarczyk.ignacy.CommunicatorServer.model;
 import java.util.Calendar;
 import java.util.HashSet;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.QuitChattingEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoomEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinInExistingRoomEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.SendMessageEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.MessageData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
@@ -45,12 +45,12 @@ public class UserActionProcessor {
 	/**
 	 * 주어진 이름을 가진 방에 주어진 닉네임을 가진 사용자가 있는지 확인하고 사용자를 추가하는 메소드
 	 * 
-	 * @param joinExistingRoomEvent
+	 * @param joinInExistingRoomEvent
 	 */
-	public boolean addUserToSpecificRoom(final JoinExistingRoomEvent joinExistingRoomEvent) {
+	public boolean addUserToSpecificRoom(final JoinInExistingRoomEvent joinInExistingRoomEvent) {
 		for (Room room : roomList) {
-			if (joinExistingRoomEvent.getRoomName().equals(room.getRoomName())) {
-				room.addUser(new UserId(joinExistingRoomEvent.getUserIdData().getUserName()));
+			if (joinInExistingRoomEvent.getRoomName().equals(room.getRoomName())) {
+				room.addUser(new UserId(joinInExistingRoomEvent.getUserIdData().getUserName()));
 				return true;
 			}
 		}
@@ -105,7 +105,7 @@ public class UserActionProcessor {
 	 * 
 	 * @param clientLeftRoomEvent
 	 */
-	public void setUserToInactive(ClientLeftRoomEvent clientLeftRoomEvent) {
+	public void setUserToInactive(QuitChattingEvent clientLeftRoomEvent) {
 		for (Room room : roomList) {
 			if (room.getRoomName().equals(clientLeftRoomEvent.getRoomName())) {
 				for (User user : room.getUserList()) {

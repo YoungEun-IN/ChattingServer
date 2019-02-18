@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.ConnectionEstablishedServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MainChatViewServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.ConversationServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
@@ -72,37 +72,36 @@ public class MainConnectionHandler {
 	/**
 	 * 주어진 닉네임을 가진 사용자에게 직접 메시지를 보내는 메소드
 	 * 
-	 * @param userName
-	 * @param usersConversation 사용자 간의 대화
-	 * @param listOfUsers       현재 채팅중인 사용자 목록
+	 * @param userIdData
+	 * @param roomData
 	 */
-	public void sendDirectMessage(final UserIdData userIdData, final RoomData roomData) {
+	private void sendDirectMessage(final UserIdData userIdData, final RoomData roomData) {
 		try {
-			ConversationServerEvent userConversationToSend = new ConversationServerEvent(roomData);
-			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(userConversationToSend);
+			ConversationServerEvent conversationServerEvent = new ConversationServerEvent(roomData);
+			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(conversationServerEvent);
 		} catch (IOException ex) {
-			System.err.println("익셉션 발생. " + ex);
+			System.err.println("직접 메시지 보낼 때 익셉션 발생. " + ex);
 		}
 	}
 
 	/**
-	 * 방을 올바르게 만들거나 추가하기 위해 클라이언트에게 확인을 보내는 메소드
+	 * 방을 올바르게 만들거나 추가하기 위해 클라이언트에게 정보를 보내는 메소드
 	 * 
-	 * @param userId
+	 * @param userIdData
 	 * @param roomName
 	 */
-	public void assertConnectionEstablished(final UserIdData userIdData, final String roomName) {
+	public void sendMainChatViewInfo(final UserIdData userIdData, final String roomName) {
 		try {
-			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new ConnectionEstablishedServerEvent( userIdData, roomName));
+			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new MainChatViewServerEvent(userIdData, roomName));
 		} catch (IOException e) {
 			System.err.println(e);
 		}
 	}
 
 	/**
-	 * 이 메서드는 사용자에게 메시지를 보내는 데 사용됩니다.
+	 * 사용자에게 메시지를 보내는 데 사용되는 메소드
 	 * 
-	 * @param messageObject 표시 할 메시지와 정보 메시지를 보내는 사용자의 닉네임 포함
+	 * @param messageObject
 	 */
 	public void sendMessage(InfoServerEvent messageObject) {
 		try {

@@ -50,7 +50,7 @@ class ServerSocketHandler extends Thread {
 				int remoteHostPort = remoteSocketAddress.getPort();
 				
 				System.out.println("서버에 클라이언트 연결됨. connected socket address:" + remoteHostName + "port:" + remoteHostPort);
-				UserConnectionHandler userConnection = new UserConnectionHandler(userSocket, eventQueue, userOutputStreams);
+				ConnectionHandler userConnection = new ConnectionHandler(userSocket, eventQueue, userOutputStreams);
 				userConnection.start();
 			} catch (IOException ex) {
 				System.err.println(ex);

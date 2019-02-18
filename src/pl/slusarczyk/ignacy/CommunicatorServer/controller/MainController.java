@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ClientLeftRoomEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.QuitChattingEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinInExistingRoomEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.SendMessageEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoomEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
@@ -42,9 +42,9 @@ public class MainController {
 		// 이벤트 처리 정책 맵 작성
 		strategyMap = new HashMap<Class<? extends ServerHandledEvent>, ClientEventStrategy>();
 		strategyMap.put(CreateNewRoomEvent.class, new CreateNewRoomStrategy());
-		strategyMap.put(JoinExistingRoomEvent.class, new JoinExistingRoomStrategy());
+		strategyMap.put(JoinInExistingRoomEvent.class, new JoinInExistingRoomStrategy());
 		strategyMap.put(SendMessageEvent.class, new NewMessageStrategy());
-		strategyMap.put(ClientLeftRoomEvent.class, new ClientLeftRoomStrategy());
+		strategyMap.put(QuitChattingEvent.class, new ClientLeftRoomStrategy());
 	}
 
 	/**
@@ -81,7 +81,7 @@ public class MainController {
 		void execute(final ServerHandledEvent serverHandledEvent) {
 			CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) serverHandledEvent;
 			if (userActionProcessor.createNewRoom(createNewRoomEvent)) {
-				mainConnectionHandler.assertConnectionEstablished(createNewRoomEvent.getUserIdData(), createNewRoomEvent.getRoomName());
+				mainConnectionHandler.sendMainChatViewInfo(createNewRoomEvent.getUserIdData(), createNewRoomEvent.getRoomName());
 			} else {
 				mainConnectionHandler.sendMessage(new InfoServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserIdData()));
 			}
@@ -91,13 +91,13 @@ public class MainController {
 	/**
 	 * 기존 방에 합류하기위한 사용자 지원 전략을 설명하는 내부 클래스입니다.
 	 */
-	class JoinExistingRoomStrategy extends ClientEventStrategy {
+	class JoinInExistingRoomStrategy extends ClientEventStrategy {
 		void execute(final ServerHandledEvent serverHandledEvent) {
-			JoinExistingRoomEvent joinExistingRoomEvent = (JoinExistingRoomEvent) serverHandledEvent;
-			if (userActionProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
-				mainConnectionHandler.assertConnectionEstablished(joinExistingRoomEvent.getUserIdData(), joinExistingRoomEvent.getRoomName());
+			JoinInExistingRoomEvent joinInExistingRoomEvent = (JoinInExistingRoomEvent) serverHandledEvent;
+			if (userActionProcessor.addUserToSpecificRoom(joinInExistingRoomEvent)) {
+				mainConnectionHandler.sendMainChatViewInfo(joinInExistingRoomEvent.getUserIdData(), joinInExistingRoomEvent.getRoomName());
 			} else {
-				mainConnectionHandler.sendMessage(new InfoServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserIdData()));
+				mainConnectionHandler.sendMessage(new InfoServerEvent("가입하려는 방은 존재하지 않습니다.", joinInExistingRoomEvent.getUserIdData()));
 			}
 		}
 	}
@@ -118,7 +118,7 @@ public class MainController {
 	 */
 	class ClientLeftRoomStrategy extends ClientEventStrategy {
 		void execute(final ServerHandledEvent serverHandledEvent) {
-			ClientLeftRoomEvent clientLeftRoomInformation = (ClientLeftRoomEvent) serverHandledEvent;
+			QuitChattingEvent clientLeftRoomInformation = (QuitChattingEvent) serverHandledEvent;
 			userActionProcessor.setUserToInactive(clientLeftRoomInformation);
 		}
 	}
