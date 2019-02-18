@@ -3,10 +3,10 @@ package pl.slusarczyk.ignacy.CommunicatorServer.model;
 import java.util.Calendar;
 import java.util.HashSet;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.QuitChattingEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoomEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoomEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.SendMessageEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.CreateNewRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.JoinExistingRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.QuitChattingEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.SendMessageEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.MessageData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;

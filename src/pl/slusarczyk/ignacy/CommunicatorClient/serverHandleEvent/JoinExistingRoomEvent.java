@@ -1,4 +1,4 @@
-package pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent;
+package pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent;
 
 import java.io.Serializable;
 

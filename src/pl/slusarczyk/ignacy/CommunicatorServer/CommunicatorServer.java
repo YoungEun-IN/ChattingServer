@@ -3,7 +3,7 @@ package pl.slusarczyk.ignacy.CommunicatorServer;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.ServerHandledEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.connection.MainConnectionHandler;
 import pl.slusarczyk.ignacy.CommunicatorServer.controller.MainController;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserActionProcessor;

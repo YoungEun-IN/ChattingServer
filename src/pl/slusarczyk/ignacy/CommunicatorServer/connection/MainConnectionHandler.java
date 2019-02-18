@@ -6,10 +6,10 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.AfterConnectionServerEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.ConversationServerEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent.ServerHandledEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.AfterConnectionServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.ConversationServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.MessageServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
