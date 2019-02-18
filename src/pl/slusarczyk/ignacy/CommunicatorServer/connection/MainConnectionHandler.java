@@ -89,11 +89,11 @@ public class MainConnectionHandler {
 	 * 방을 올바르게 만들거나 추가하기 위해 클라이언트에게 확인을 보내는 메소드
 	 * 
 	 * @param userId
-	 * @param isEstablished
+	 * @param roomName
 	 */
-	public void assertConnectionEstablished(final UserIdData userIdData, final boolean isEstablished, final String roomName) {
+	public void assertConnectionEstablished(final UserIdData userIdData, final String roomName) {
 		try {
-			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new ConnectionEstablishedServerEvent(isEstablished, userIdData, roomName));
+			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new ConnectionEstablishedServerEvent( userIdData, roomName));
 		} catch (IOException e) {
 			System.err.println(e);
 		}

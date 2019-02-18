@@ -64,15 +64,15 @@ public class UserConnectionHandler extends Thread {
 
 				/** 클라이언트가 방에 들어 오거나 방을 만들 때, 출력 스트림을 작성 */
 				if (appEvent instanceof CreateNewRoomEvent) {
-					CreateNewRoomEvent createNewRoomInformation = (CreateNewRoomEvent) appEvent;
+					CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) appEvent;
 
 					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
-					if (userOutputStreams.get(new UserId(createNewRoomInformation.getUserIdData().getUserName())) != null) {
-						outputStream.writeObject(new InfoServerEvent("주어진 이름의 사용자가 이미 있습니다.", createNewRoomInformation.getUserIdData()));
+					if (userOutputStreams.get(new UserId(createNewRoomEvent.getUserIdData().getUserName())) != null) {
+						outputStream.writeObject(new InfoServerEvent("주어진 이름의 사용자가 이미 있습니다.", createNewRoomEvent.getUserIdData()));
 					}
 					/** 존재하지 않으면 맵에 추가합니다. */
 					else {
-						userOutputStreams.put(new UserId(createNewRoomInformation.getUserIdData().getUserName()), outputStream);
+						userOutputStreams.put(new UserId(createNewRoomEvent.getUserIdData().getUserName()), outputStream);
 						eventQueue.add(appEvent);
 					}
 				} else if (appEvent instanceof JoinExistingRoomEvent) {

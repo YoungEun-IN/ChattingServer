@@ -33,7 +33,8 @@ public class MainController {
 	 * @param userActionProcessor
 	 * @param mainConnectionHandler 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
 	 */
-	public MainController(final BlockingQueue<ServerHandledEvent> eventQueue, final UserActionProcessor userActionProcessor, final MainConnectionHandler mainConnectionHandler) {
+	public MainController(final BlockingQueue<ServerHandledEvent> eventQueue, final UserActionProcessor userActionProcessor,
+			final MainConnectionHandler mainConnectionHandler) {
 		this.eventQueue = eventQueue;
 		this.userActionProcessor = userActionProcessor;
 		this.mainConnectionHandler = mainConnectionHandler;
@@ -80,7 +81,7 @@ public class MainController {
 		void execute(final ServerHandledEvent serverHandledEvent) {
 			CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) serverHandledEvent;
 			if (userActionProcessor.createNewRoom(createNewRoomEvent)) {
-				mainConnectionHandler.assertConnectionEstablished(createNewRoomEvent.getUserIdData(), true, createNewRoomEvent.getRoomName());
+				mainConnectionHandler.assertConnectionEstablished(createNewRoomEvent.getUserIdData(), createNewRoomEvent.getRoomName());
 			} else {
 				mainConnectionHandler.sendMessage(new InfoServerEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserIdData()));
 			}
@@ -94,7 +95,7 @@ public class MainController {
 		void execute(final ServerHandledEvent serverHandledEvent) {
 			JoinExistingRoomEvent joinExistingRoomEvent = (JoinExistingRoomEvent) serverHandledEvent;
 			if (userActionProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
-				mainConnectionHandler.assertConnectionEstablished(joinExistingRoomEvent.getUserIdData(), true, joinExistingRoomEvent.getRoomName());
+				mainConnectionHandler.assertConnectionEstablished(joinExistingRoomEvent.getUserIdData(), joinExistingRoomEvent.getRoomName());
 			} else {
 				mainConnectionHandler.sendMessage(new InfoServerEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserIdData()));
 			}
