@@ -13,7 +13,6 @@ import pl.slusarczyk.ignacy.CommunicatorServer.clientHandleEvent.MessageServerEv
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserName;
 
 /**
  * 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
@@ -75,10 +74,10 @@ public class MainConnectionHandler {
 	 * @param userName
 	 * @param roomData
 	 */
-	private void sendDirectMessage(final UserName userName, final RoomData roomData) {
+	private void sendDirectMessage(final String userName, final RoomData roomData) {
 		try {
 			ConversationServerEvent conversationServerEvent = new ConversationServerEvent(roomData);
-			userOutputStreams.get(new UserId(userName.getUserName())).writeObject(conversationServerEvent);
+			userOutputStreams.get(new UserId(userName)).writeObject(conversationServerEvent);
 		} catch (IOException ex) {
 			System.err.println("직접 메시지 보낼 때 익셉션 발생. " + ex);
 		}
@@ -90,9 +89,9 @@ public class MainConnectionHandler {
 	 * @param userName
 	 * @param roomName
 	 */
-	public void sendMainChatViewInfo(final UserName userName, final String roomName) {
+	public void sendMainChatViewInfo(final String userName, final String roomName) {
 		try {
-			userOutputStreams.get(new UserId(userName.getUserName())).writeObject(new AfterConnectionServerEvent(userName, roomName));
+			userOutputStreams.get(new UserId(userName)).writeObject(new AfterConnectionServerEvent(userName, roomName));
 		} catch (IOException e) {
 			System.err.println(e);
 		}
@@ -105,8 +104,8 @@ public class MainConnectionHandler {
 	 */
 	public void sendMessage(MessageServerEvent messageObject) {
 		try {
-			userOutputStreams.get(new UserId(messageObject.getUserName().getUserName())).writeObject(messageObject);
-			userOutputStreams.remove(new UserId(messageObject.getUserName().getUserName()));
+			userOutputStreams.get(new UserId(messageObject.getUserName())).writeObject(messageObject);
+			userOutputStreams.remove(new UserId(messageObject.getUserName()));
 		} catch (IOException ex) {
 			System.err.println("익셉션 발생. " + ex);
 		}

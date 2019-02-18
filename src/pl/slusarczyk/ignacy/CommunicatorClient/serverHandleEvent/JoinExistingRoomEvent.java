@@ -2,8 +2,6 @@ package pl.slusarczyk.ignacy.CommunicatorClient.serverHandleEvent;
 
 import java.io.Serializable;
 
-import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserName;
-
 /**
  * 사용자가 방에 연결하기 위해 버튼을 누르는 이벤트를 설명하는 클래스
  */
@@ -13,7 +11,7 @@ public class JoinExistingRoomEvent extends ServerHandledEvent implements Seriali
 	/**roomName*/
 	private final String roomName;
 	/**userName*/
-	private final UserName userName;
+	private final String userName;
 
 	/**
 	 * 지정된 매개 변수를 기반으로 이벤트를 만드는 생성자
@@ -21,7 +19,7 @@ public class JoinExistingRoomEvent extends ServerHandledEvent implements Seriali
 	 * @param roomName 
 	 * @param userId ID
 	 */
-	public JoinExistingRoomEvent (final String roomName,final UserName userName)
+	public JoinExistingRoomEvent (final String roomName,final String userName)
 	{
 		this.roomName = roomName;
 		this.userName = userName;
@@ -42,7 +40,7 @@ public class JoinExistingRoomEvent extends ServerHandledEvent implements Seriali
 	 * 
 	 * @return userName
 	 */
-	public UserName getUserName()
+	public String getUserName()
 	{
 		return userName;
 	}
