@@ -7,7 +7,7 @@ import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserIdData;
 /**
  * 클라이언트 응용 프로그램에서 기본 대화창을 열 정보를 제공
  */
-public class MainChatViewServerEvent extends ClientHandledEvent implements Serializable {
+public class AfterConnectionServerEvent extends ClientHandledEvent implements Serializable {
 	private static final long serialVersionUID = 1L;
 	/** 감싸인 사용자 이름 */
 	private final UserIdData userIDData;
@@ -20,7 +20,7 @@ public class MainChatViewServerEvent extends ClientHandledEvent implements Seria
 	 * @param userIdData
 	 * @param roomName
 	 */
-	public MainChatViewServerEvent(final UserIdData userIdData, final String roomName) {
+	public AfterConnectionServerEvent(final UserIdData userIdData, final String roomName) {
 		this.userIDData = userIdData;
 		this.roomName = roomName;
 	}

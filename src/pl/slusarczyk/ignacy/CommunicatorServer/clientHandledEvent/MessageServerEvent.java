@@ -7,14 +7,14 @@ import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserIdData;
 /**
  * 이 클래스는 사용자에게 정보를 보내는 데 사용됩니다.
  */
-public class InfoServerEvent extends ClientHandledEvent implements Serializable {
+public class MessageServerEvent extends ClientHandledEvent implements Serializable {
 	private static final long serialVersionUID = 1L;
 	/** 사용자에게 표시 될 메시지 */
 	private final String message;
 	/** 메시지가 표시 될 사용자의 사전 패키지 이름 */
 	private final UserIdData userIDData;
 
-	public InfoServerEvent(final String message, final UserIdData userIDData) {
+	public MessageServerEvent(final String message, final UserIdData userIDData) {
 		this.message = message;
 		this.userIDData = userIDData;
 	}

@@ -8,10 +8,10 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.QuitChattingEvent;
-import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinInExistingRoomEvent;
+import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.JoinExistingRoomEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.CreateNewRoomEvent;
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 
 /**
@@ -68,19 +68,19 @@ public class ConnectionHandler extends Thread {
 
 					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
 					if (userOutputStreams.get(new UserId(createNewRoomEvent.getUserIdData().getUserName())) != null) {
-						outputStream.writeObject(new InfoServerEvent("주어진 이름의 사용자가 이미 있습니다.", createNewRoomEvent.getUserIdData()));
+						outputStream.writeObject(new MessageServerEvent("주어진 이름의 사용자가 이미 있습니다.", createNewRoomEvent.getUserIdData()));
 					}
 					/** 존재하지 않으면 맵에 추가합니다. */
 					else {
 						userOutputStreams.put(new UserId(createNewRoomEvent.getUserIdData().getUserName()), outputStream);
 						eventQueue.add(appEvent);
 					}
-				} else if (appEvent instanceof JoinInExistingRoomEvent) {
-					JoinInExistingRoomEvent joinNewRoomInformation = (JoinInExistingRoomEvent) appEvent;
+				} else if (appEvent instanceof JoinExistingRoomEvent) {
+					JoinExistingRoomEvent joinNewRoomInformation = (JoinExistingRoomEvent) appEvent;
 
 					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
 					if (userOutputStreams.get(new UserId(joinNewRoomInformation.getUserIdData().getUserName())) != null) {
-						outputStream.writeObject(new InfoServerEvent("주어진 이름의 사용자가 이미 있습니다.", joinNewRoomInformation.getUserIdData()));
+						outputStream.writeObject(new MessageServerEvent("주어진 이름의 사용자가 이미 있습니다.", joinNewRoomInformation.getUserIdData()));
 					} else {
 						/** 존재하지 않으면 맵에 추가합니다. */
 						userOutputStreams.put(new UserId(joinNewRoomInformation.getUserIdData().getUserName()), outputStream);

@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 import pl.slusarczyk.ignacy.CommunicatorClient.serverHandledEvent.ServerHandledEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MainChatViewServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.AfterConnectionServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.ConversationServerEvent;
-import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.InfoServerEvent;
+import pl.slusarczyk.ignacy.CommunicatorServer.clientHandledEvent.MessageServerEvent;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.UserId;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.RoomData;
 import pl.slusarczyk.ignacy.CommunicatorServer.model.data.UserData;
@@ -92,7 +92,7 @@ public class MainConnectionHandler {
 	 */
 	public void sendMainChatViewInfo(final UserIdData userIdData, final String roomName) {
 		try {
-			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new MainChatViewServerEvent(userIdData, roomName));
+			userOutputStreams.get(new UserId(userIdData.getUserName())).writeObject(new AfterConnectionServerEvent(userIdData, roomName));
 		} catch (IOException e) {
 			System.err.println(e);
 		}
@@ -103,7 +103,7 @@ public class MainConnectionHandler {
 	 * 
 	 * @param messageObject
 	 */
-	public void sendMessage(InfoServerEvent messageObject) {
+	public void sendMessage(MessageServerEvent messageObject) {
 		try {
 			userOutputStreams.get(new UserId(messageObject.getUserIDData().getUserName())).writeObject(messageObject);
 			userOutputStreams.remove(new UserId(messageObject.getUserIDData().getUserName()));
