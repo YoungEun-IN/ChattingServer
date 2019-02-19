@@ -7,11 +7,11 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import chattingClient.clientEvent.CreateNewRoomEvent;
-import chattingClient.clientEvent.JoinExistingRoomEvent;
-import chattingClient.clientEvent.QuitChattingEvent;
-import chattingClient.clientEvent.ClientdEvent;
-import chattingServer.serverEvent.AlertToClientEvent;
+import chattingClient.clientSideEvent.CreateNewRoomEvent;
+import chattingClient.clientSideEvent.JoinExistingRoomEvent;
+import chattingClient.clientSideEvent.QuitChattingEvent;
+import chattingClient.clientSideEvent.ClientSideEvent;
+import chattingServer.serverSideEvent.AlertToClientEvent;
 import chattingServer.model.UserId;
 
 /**
@@ -27,7 +27,7 @@ public class ConnectionHandler extends Thread {
 	/** 사용자별 출력 스트림 맵 */
 	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
 	/** 블로킹 큐 */
-	private final BlockingQueue<ClientdEvent> eventQueue;
+	private final BlockingQueue<ClientSideEvent> eventQueue;
 	/** 작업중 식별 플래그 */
 	private boolean isRunning;
 
@@ -38,7 +38,7 @@ public class ConnectionHandler extends Thread {
 	 * @param eventQueue        
 	 * @param userOutputStreams
 	 */
-	public ConnectionHandler(final Socket userSocket, final BlockingQueue<ClientdEvent> eventQueue, final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
+	public ConnectionHandler(final Socket userSocket, final BlockingQueue<ClientSideEvent> eventQueue, final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
 		this.userSocket = userSocket;
 		this.eventQueue = eventQueue;
 		this.userOutputStreams = userOutputStreams;
@@ -57,10 +57,10 @@ public class ConnectionHandler extends Thread {
 	 * 클라이언트에서 이벤트를 수신하여 블로킹 큐에 추가하는 클래스의 기본 루프
 	 */
 	public void run() {
-		ClientdEvent appEvent;
+		ClientSideEvent appEvent;
 		while (isRunning) {
 			try {
-				appEvent = (ClientdEvent) inputStream.readObject();
+				appEvent = (ClientSideEvent) inputStream.readObject();
 
 				/** 클라이언트가 방에 들어 오거나 방을 만들 때, 출력 스트림을 작성 */
 				if (appEvent instanceof CreateNewRoomEvent) {

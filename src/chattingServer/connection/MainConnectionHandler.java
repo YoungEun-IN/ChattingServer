@@ -6,13 +6,13 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import chattingClient.clientEvent.ClientdEvent;
-import chattingServer.serverEvent.ChatRoomViewBuildEvent;
-import chattingServer.serverEvent.ConversationBuildEvent;
-import chattingServer.serverEvent.AlertToClientEvent;
+import chattingClient.clientSideEvent.ClientSideEvent;
 import chattingServer.model.UserId;
 import chattingServer.model.data.RoomData;
 import chattingServer.model.data.UserData;
+import chattingServer.serverSideEvent.AlertToClientEvent;
+import chattingServer.serverSideEvent.ChatRoomViewBuildEvent;
+import chattingServer.serverSideEvent.ConversationBuildEvent;
 
 /**
  * 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
@@ -25,7 +25,7 @@ public class MainConnectionHandler {
 	/** 포트 넘버 */
 	private final int portNumber;
 	/** 이벤트 큐 */
-	private final BlockingQueue<ClientdEvent> eventQueue;
+	private final BlockingQueue<ClientSideEvent> eventQueue;
 
 	/**
 	 * 지정된 포트에 서버를 연결하는 생성자. 새 연결을 연결하기 위해 별도의 링크를 만듭니다.
@@ -33,7 +33,7 @@ public class MainConnectionHandler {
 	 * @param portNumber
 	 * @param eventQueue
 	 */
-	public MainConnectionHandler(final int portNumber, final BlockingQueue<ClientdEvent> eventQueueObject) {
+	public MainConnectionHandler(final int portNumber, final BlockingQueue<ClientSideEvent> eventQueueObject) {
 		this.portNumber = portNumber;
 		this.eventQueue = eventQueueObject;
 		this.userOutputStreams = new HashMap<UserId, ObjectOutputStream>();

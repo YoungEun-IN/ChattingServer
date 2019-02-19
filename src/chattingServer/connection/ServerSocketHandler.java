@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import chattingClient.clientEvent.ClientdEvent;
+import chattingClient.clientSideEvent.ClientSideEvent;
 import chattingServer.model.UserId;
 
 /**
@@ -18,7 +18,7 @@ class ServerSocketHandler extends Thread {
 	/** Socket 서버 */
 	private final ServerSocket serverSocket;
 	/** 블로킹 큐 */
-	private final BlockingQueue<ClientdEvent> eventQueue;
+	private final BlockingQueue<ClientSideEvent> eventQueue;
 	/** 해시맵 */
 	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
 
@@ -29,7 +29,7 @@ class ServerSocketHandler extends Thread {
 	 * @param eventQueue
 	 * @param userOutputStreams
 	 */
-	public ServerSocketHandler(final ServerSocket serverSocket, final BlockingQueue<ClientdEvent> eventQueue,
+	public ServerSocketHandler(final ServerSocket serverSocket, final BlockingQueue<ClientSideEvent> eventQueue,
 			final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
 		this.serverSocket = serverSocket;
 		this.eventQueue = eventQueue;

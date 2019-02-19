@@ -4,12 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 
-import chattingClient.clientEvent.CreateNewRoomEvent;
-import chattingClient.clientEvent.JoinExistingRoomEvent;
-import chattingClient.clientEvent.QuitChattingEvent;
-import chattingClient.clientEvent.SendMessageEvent;
-import chattingClient.clientEvent.ClientdEvent;
-import chattingServer.serverEvent.AlertToClientEvent;
+import chattingClient.clientSideEvent.CreateNewRoomEvent;
+import chattingClient.clientSideEvent.JoinExistingRoomEvent;
+import chattingClient.clientSideEvent.QuitChattingEvent;
+import chattingClient.clientSideEvent.SendMessageEvent;
+import chattingClient.clientSideEvent.ClientSideEvent;
+import chattingServer.serverSideEvent.AlertToClientEvent;
 import chattingServer.connection.MainConnectionHandler;
 import chattingServer.model.UserActionProcessor;
 
@@ -18,11 +18,11 @@ import chattingServer.model.UserActionProcessor;
  */
 public class MainController {
 	/** 이벤트 큐 */
-	private final BlockingQueue<ClientdEvent> eventQueue;
+	private final BlockingQueue<ClientSideEvent> eventQueue;
 	/** 모델 */
 	private final UserActionProcessor userActionProcessor;
 	/** 이벤트 처리 전략 맵 */
-	private final Map<Class<? extends ClientdEvent>, ClientEventStrategy> strategyMap;
+	private final Map<Class<? extends ClientSideEvent>, ClientSideEventStrategy> strategyMap;
 	/** 서버에 대한 참조 */
 	private final MainConnectionHandler mainConnectionHandler;
 
@@ -33,14 +33,14 @@ public class MainController {
 	 * @param userActionProcessor
 	 * @param mainConnectionHandler 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
 	 */
-	public MainController(final BlockingQueue<ClientdEvent> eventQueue, final UserActionProcessor userActionProcessor,
+	public MainController(final BlockingQueue<ClientSideEvent> eventQueue, final UserActionProcessor userActionProcessor,
 			final MainConnectionHandler mainConnectionHandler) {
 		this.eventQueue = eventQueue;
 		this.userActionProcessor = userActionProcessor;
 		this.mainConnectionHandler = mainConnectionHandler;
 
 		// 이벤트 처리 정책 맵 작성
-		strategyMap = new HashMap<Class<? extends ClientdEvent>, ClientEventStrategy>();
+		strategyMap = new HashMap<Class<? extends ClientSideEvent>, ClientSideEventStrategy>();
 		strategyMap.put(CreateNewRoomEvent.class, new CreateNewRoomStrategy());
 		strategyMap.put(JoinExistingRoomEvent.class, new JoinExistingRoomStrategy());
 		strategyMap.put(SendMessageEvent.class, new NewMessageStrategy());
@@ -53,9 +53,9 @@ public class MainController {
 	public void work() {
 		while (true) {
 			try {
-				ClientdEvent clientdEvent = eventQueue.take();
-				ClientEventStrategy clientEventStrategy = strategyMap.get(clientdEvent.getClass());
-				clientEventStrategy.execute(clientdEvent);
+				ClientSideEvent clientdEvent = eventQueue.take();
+				ClientSideEventStrategy clientSideEventStrategy = strategyMap.get(clientdEvent.getClass());
+				clientSideEventStrategy.execute(clientdEvent);
 			} catch (InterruptedException e) {
 				// 컨트롤러가 이벤트가 나타날 때까지 일시 중지해야하므로 아무 것도하지 않습니다.
 			}
@@ -65,20 +65,20 @@ public class MainController {
 	/**
 	 * 이벤트를 처리하는 전략 클래스의 추상 기본 클래스입니다
 	 */
-	abstract class ClientEventStrategy {
+	abstract class ClientSideEventStrategy {
 		/**
 		 * 주어진 이벤트의 서비스를 기술하는 추상 메소드.
 		 * 
 		 * @param applicationEvent 지원되어야하는 응용 프로그램 이벤트
 		 */
-		abstract void execute(final ClientdEvent applicationEvent);
+		abstract void execute(final ClientSideEvent applicationEvent);
 	}
 
 	/**
 	 * 새 방을 만들어 사용자를 운영하는 전략을 설명하는 내부 클래스입니다.
 	 */
-	class CreateNewRoomStrategy extends ClientEventStrategy {
-		void execute(final ClientdEvent clientdEvent) {
+	class CreateNewRoomStrategy extends ClientSideEventStrategy {
+		void execute(final ClientSideEvent clientdEvent) {
 			CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) clientdEvent;
 			if (userActionProcessor.createNewRoom(createNewRoomEvent)) {
 				mainConnectionHandler.sendMainChatViewInfo(createNewRoomEvent.getUserName(), createNewRoomEvent.getRoomName());
@@ -91,8 +91,8 @@ public class MainController {
 	/**
 	 * 기존 방에 합류하기위한 사용자 지원 전략을 설명하는 내부 클래스입니다.
 	 */
-	class JoinExistingRoomStrategy extends ClientEventStrategy {
-		void execute(final ClientdEvent clientdEvent) {
+	class JoinExistingRoomStrategy extends ClientSideEventStrategy {
+		void execute(final ClientSideEvent clientdEvent) {
 			JoinExistingRoomEvent joinExistingRoomEvent = (JoinExistingRoomEvent) clientdEvent;
 			if (userActionProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
 				mainConnectionHandler.sendMainChatViewInfo(joinExistingRoomEvent.getUserName(), joinExistingRoomEvent.getRoomName());
@@ -105,8 +105,8 @@ public class MainController {
 	/**
 	 * 사용자가 새 메시지를 보내는 서비스 전략을 설명하는 내부 클래스
 	 */
-	class NewMessageStrategy extends ClientEventStrategy {
-		void execute(final ClientdEvent clientdEvent) {
+	class NewMessageStrategy extends ClientSideEventStrategy {
+		void execute(final ClientSideEvent clientdEvent) {
 			SendMessageEvent newMessageInformation = (SendMessageEvent) clientdEvent;
 			userActionProcessor.addMessageOfUser(newMessageInformation);
 			mainConnectionHandler.sendMessageToAll(userActionProcessor.getRoomData(newMessageInformation));
@@ -116,8 +116,8 @@ public class MainController {
 	/**
 	 * 방의 사용자의 이탈 전략을 설명하는 내부 클래스입니다.
 	 */
-	class ClientLeftRoomStrategy extends ClientEventStrategy {
-		void execute(final ClientdEvent clientdEvent) {
+	class ClientLeftRoomStrategy extends ClientSideEventStrategy {
+		void execute(final ClientSideEvent clientdEvent) {
 			QuitChattingEvent clientLeftRoomInformation = (QuitChattingEvent) clientdEvent;
 			userActionProcessor.setUserToInactive(clientLeftRoomInformation);
 		}

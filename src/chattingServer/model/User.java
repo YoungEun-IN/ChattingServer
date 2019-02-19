@@ -3,7 +3,7 @@ package chattingServer.model;
 import java.util.Date;
 import java.util.HashSet;
 
-import chattingClient.clientEvent.SendMessageEvent;
+import chattingClient.clientSideEvent.SendMessageEvent;
 
 /**
  * User 클래스는 특정 사용자에 대한 모든 정보를 포함합니다. 이 정보는 userId와 그에 의해 보내지는 모든 메시지를 나타내는 메시지
