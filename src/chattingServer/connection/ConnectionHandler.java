@@ -1,116 +1,113 @@
 package chattingServer.connection;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.Socket;
+import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import chattingClient.clientSideEvent.CreateNewRoomEvent;
-import chattingClient.clientSideEvent.JoinExistingRoomEvent;
-import chattingClient.clientSideEvent.QuitChattingEvent;
 import chattingClient.clientSideEvent.ClientSideEvent;
-import chattingServer.serverSideEvent.AlertToClientEvent;
 import chattingServer.model.UserId;
+import chattingServer.model.data.RoomData;
+import chattingServer.model.data.UserData;
+import chattingServer.serverSideEvent.AlertToClientEvent;
+import chattingServer.serverSideEvent.ChatRoomViewBuildEvent;
+import chattingServer.serverSideEvent.ConversationBuildEvent;
 
 /**
- * 클라이언트로부터 이벤트를 수신하여 큐에 추가하는 역할을 담당하는 클래스
+ * 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
  */
-public class ConnectionHandler extends Thread {
-	/** userSocket */
-	private final Socket userSocket;
-	/** 입력 스트림 */
-	private ObjectInputStream inputStream;
-	/** 출력 스트림 */
-	private ObjectOutputStream outputStream;
-	/** 사용자별 출력 스트림 맵 */
+public class ConnectionHandler {
+	/** userId가 키인 출력 스트림을 사용자가 보유하고있는 맵 */
 	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
-	/** 블로킹 큐 */
+	/** 서버소켓 */
+	private ServerSocket serverSocket;
+	/** 포트 넘버 */
+	private final int portNumber;
+	/** 이벤트 큐 */
 	private final BlockingQueue<ClientSideEvent> eventQueue;
-	/** 작업중 식별 플래그 */
-	private boolean isRunning;
 
 	/**
-	 * 주어진 사용자로부터 연결에 대한 새로운 링크를 생성하는 생성자
+	 * 지정된 포트에 서버를 연결하는 생성자. 새 연결을 연결하기 위해 별도의 링크를 만듭니다.
 	 * 
-	 * @param userSocket        
-	 * @param eventQueue        
-	 * @param userOutputStreams
+	 * @param portNumber
+	 * @param eventQueue
 	 */
-	public ConnectionHandler(final Socket userSocket, final BlockingQueue<ClientSideEvent> eventQueue, final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
-		this.userSocket = userSocket;
-		this.eventQueue = eventQueue;
-		this.userOutputStreams = userOutputStreams;
-		this.isRunning = true;
+	public ConnectionHandler(final int portNumber, final BlockingQueue<ClientSideEvent> eventQueueObject) {
+		this.portNumber = portNumber;
+		this.eventQueue = eventQueueObject;
+		this.userOutputStreams = new HashMap<UserId, ObjectOutputStream>();
 
+		createServerSocket();
+		ServerSocketThread serverSocketThread = new ServerSocketThread(serverSocket, eventQueue, userOutputStreams);
+		serverSocketThread.start();
+	}
+
+	/**
+	 * 지정된 포트에 서버 소켓을 만드는 메소드
+	 */
+	public void createServerSocket() {
 		try {
-			outputStream = new ObjectOutputStream(userSocket.getOutputStream());
-			inputStream = new ObjectInputStream(userSocket.getInputStream());
+			this.serverSocket = new ServerSocket(portNumber);
 		} catch (IOException ex) {
-			System.err.println("클라이언트 스트림을 생성 할 때 예외 발생. " + ex);
-			return;
+			System.err.println("연결을 만들 때 익셉션 발생. " + ex);
+			System.exit(1);
 		}
 	}
 
 	/**
-	 * 클라이언트에서 이벤트를 수신하여 블로킹 큐에 추가하는 클래스의 기본 루프
+	 * 같은 방에있는 모든 사용자에게 메시지 보내는 메소드
+	 * 
+	 * @param roomData
 	 */
-	public void run() {
-		ClientSideEvent appEvent;
-		while (isRunning) {
-			try {
-				appEvent = (ClientSideEvent) inputStream.readObject();
-
-				/** 클라이언트가 방에 들어 오거나 방을 만들 때, 출력 스트림을 작성 */
-				if (appEvent instanceof CreateNewRoomEvent) {
-					CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) appEvent;
-
-					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
-					if (userOutputStreams.get(new UserId(createNewRoomEvent.getUserName())) != null) {
-						outputStream.writeObject(new AlertToClientEvent("주어진 이름의 사용자가 이미 있습니다.", createNewRoomEvent.getUserName()));
-					}
-					/** 존재하지 않으면 맵에 추가합니다. */
-					else {
-						userOutputStreams.put(new UserId(createNewRoomEvent.getUserName()), outputStream);
-						eventQueue.add(appEvent);
-					}
-				} else if (appEvent instanceof JoinExistingRoomEvent) {
-					JoinExistingRoomEvent joinNewRoomInformation = (JoinExistingRoomEvent) appEvent;
-
-					/** 맵에 추가하기 전에 주어진 사용자가 이미 존재하는지 확인해야합니다. */
-					if (userOutputStreams.get(new UserId(joinNewRoomInformation.getUserName())) != null) {
-						outputStream.writeObject(new AlertToClientEvent("주어진 이름의 사용자가 이미 있습니다.", joinNewRoomInformation.getUserName()));
-					} else {
-						/** 존재하지 않으면 맵에 추가합니다. */
-						userOutputStreams.put(new UserId(joinNewRoomInformation.getUserName()), outputStream);
-						eventQueue.add(appEvent);
-					}
-				}
-				/**
-				 * 채팅에서 사람의 출구를 나타내는 객체를 얻는다면 우리는 멈추고 컨트롤러에 이벤트를 보내야합니다.
-				 */
-				else if (appEvent instanceof QuitChattingEvent) {
-					eventQueue.add(appEvent);
-					userSocket.close();
-					isRunning = false;
-				} else {
-					eventQueue.add(appEvent);
-				}
-			} catch (IOException ex) {
-				try {
-					userSocket.close();
-					isRunning = false;
-				} catch (IOException e) {
-					System.err.println(e);
-				}
-			} catch (ClassNotFoundException ex) {
-				System.err.println("ClassNotFoundException" + ex);
-			} catch (NullPointerException ex) {
-				System.err.println("NullPointerException" + ex);
-			} catch (ClassCastException ex) {
-				System.err.println(ex);
+	public void sendMessageToAll(final RoomData roomData) {
+		for (UserData userData : roomData.getUserSet()) {
+			if (userData.isActive()) {
+				sendDirectMessage(userData.getUserName(), roomData);
 			}
+		}
+	}
+
+	/**
+	 * 주어진 닉네임을 가진 사용자에게 직접 메시지를 보내는 메소드
+	 * 
+	 * @param userName
+	 * @param roomData
+	 */
+	private void sendDirectMessage(final String userName, final RoomData roomData) {
+		try {
+			ConversationBuildEvent conversationBuildEvent = new ConversationBuildEvent(roomData);
+			userOutputStreams.get(new UserId(userName)).writeObject(conversationBuildEvent);
+		} catch (IOException ex) {
+			System.err.println("sendDirectMessage 익셉션 발생. " + ex);
+		}
+	}
+
+	/**
+	 * 방을 올바르게 만들거나 추가하기 위해 클라이언트에게 정보를 보내는 메소드
+	 * 
+	 * @param userName
+	 * @param roomName
+	 */
+	public void buildChatRoomView(final String userName, final String roomName) {
+		try {
+			userOutputStreams.get(new UserId(userName)).writeObject(new ChatRoomViewBuildEvent(userName, roomName));
+		} catch (IOException e) {
+			System.err.println(e);
+		}
+	}
+
+	/**
+	 * 사용자에게 안내를 보내는 데 사용되는 메소드
+	 * 
+	 * @param messageObject
+	 */
+	public void alert(AlertToClientEvent messageObject) {
+		try {
+			userOutputStreams.get(new UserId(messageObject.getUserName())).writeObject(messageObject);
+			userOutputStreams.remove(new UserId(messageObject.getUserName()));
+		} catch (IOException ex) {
+			System.err.println("alert 익셉션 발생. " + ex);
 		}
 	}
 }

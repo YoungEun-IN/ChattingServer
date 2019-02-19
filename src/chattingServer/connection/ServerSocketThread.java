@@ -12,9 +12,9 @@ import chattingClient.clientSideEvent.ClientSideEvent;
 import chattingServer.model.UserId;
 
 /**
- * 우리에게 책임지는 클래스는 서버가 클라이언트와 새로운 연결을 할 수있게합니다.
+ * ServerSocket을 관리하는 클래스
  */
-class ServerSocketHandler extends Thread {
+class ServerSocketThread extends Thread {
 	/** Socket 서버 */
 	private final ServerSocket serverSocket;
 	/** 블로킹 큐 */
@@ -29,7 +29,7 @@ class ServerSocketHandler extends Thread {
 	 * @param eventQueue
 	 * @param userOutputStreams
 	 */
-	public ServerSocketHandler(final ServerSocket serverSocket, final BlockingQueue<ClientSideEvent> eventQueue,
+	public ServerSocketThread(final ServerSocket serverSocket, final BlockingQueue<ClientSideEvent> eventQueue,
 			final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
 		this.serverSocket = serverSocket;
 		this.eventQueue = eventQueue;
@@ -37,21 +37,21 @@ class ServerSocketHandler extends Thread {
 	}
 
 	/**
-	 * 우리가 새로운 연결을 가지고있는 클래스의 주 루프는 클라이언트의 것입니다.
+	 * run메소드
 	 */
 	public void run() {
-		System.out.println("서버가 포트에 새 연결을 시작했습니다.: " + serverSocket.getLocalPort());
+		System.out.println("서버가 포트에 새 연결을 시작. 포트번호 : " + serverSocket.getLocalPort());
 		while (true) {
 			try {
 				Socket userSocket = serverSocket.accept();
-				
+
 				InetSocketAddress remoteSocketAddress = (InetSocketAddress) userSocket.getRemoteSocketAddress();
 				String remoteHostName = remoteSocketAddress.getAddress().getHostAddress();
 				int remoteHostPort = remoteSocketAddress.getPort();
-				
+
 				System.out.println("서버에 클라이언트 연결됨. connected socket address:  " + remoteHostName + " port : " + remoteHostPort);
-				ConnectionHandler userConnection = new ConnectionHandler(userSocket, eventQueue, userOutputStreams);
-				userConnection.start();
+				ConnectionThread connectionThread = new ConnectionThread(userSocket, eventQueue, userOutputStreams);
+				connectionThread.start();
 			} catch (IOException ex) {
 				System.err.println(ex);
 			}

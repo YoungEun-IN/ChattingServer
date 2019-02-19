@@ -4,8 +4,8 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import chattingClient.clientSideEvent.ClientSideEvent;
-import chattingServer.connection.MainConnectionHandler;
-import chattingServer.controller.MainController;
+import chattingServer.connection.ConnectionHandler;
+import chattingServer.controller.Controller;
 import chattingServer.model.UserActionProcessor;
 
 /**
@@ -18,9 +18,9 @@ public class ChattingServer {
 	 */
 	public static void main(String args[]) {
 		BlockingQueue<ClientSideEvent> eventQueue = new LinkedBlockingQueue<ClientSideEvent>();
-		MainConnectionHandler connectionHandler = new MainConnectionHandler(5000, eventQueue);
+		ConnectionHandler connectionHandler = new ConnectionHandler(5000, eventQueue);
 		UserActionProcessor userActionProcessor = new UserActionProcessor();
-		MainController controller = new MainController(eventQueue, userActionProcessor, connectionHandler);
+		Controller controller = new Controller(eventQueue, userActionProcessor, connectionHandler);
 		controller.work();
 	}
 }
