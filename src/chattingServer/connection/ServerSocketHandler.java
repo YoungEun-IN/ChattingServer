@@ -19,7 +19,7 @@ class ServerSocketHandler extends Thread {
 	private final ServerSocket serverSocket;
 	/** 블로킹 큐 */
 	private final BlockingQueue<ServerHandledEvent> eventQueue;
-	/** 출력 스트림을 사용하여 맵 작성 */
+	/** 해시맵 */
 	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
 
 	/**
@@ -40,7 +40,7 @@ class ServerSocketHandler extends Thread {
 	 * 우리가 새로운 연결을 가지고있는 클래스의 주 루프는 클라이언트의 것입니다.
 	 */
 	public void run() {
-		System.out.println("서버가 포트에 새 연결을 연결하기 시작했습니다.: " + serverSocket.getLocalPort());
+		System.out.println("서버가 포트에 새 연결을 시작했습니다.: " + serverSocket.getLocalPort());
 		while (true) {
 			try {
 				Socket userSocket = serverSocket.accept();
@@ -49,7 +49,7 @@ class ServerSocketHandler extends Thread {
 				String remoteHostName = remoteSocketAddress.getAddress().getHostAddress();
 				int remoteHostPort = remoteSocketAddress.getPort();
 				
-				System.out.println("서버에 클라이언트 연결됨. connected socket address:" + remoteHostName + "port:" + remoteHostPort);
+				System.out.println("서버에 클라이언트 연결됨. connected socket address:  " + remoteHostName + " port : " + remoteHostPort);
 				ConnectionHandler userConnection = new ConnectionHandler(userSocket, eventQueue, userOutputStreams);
 				userConnection.start();
 			} catch (IOException ex) {
