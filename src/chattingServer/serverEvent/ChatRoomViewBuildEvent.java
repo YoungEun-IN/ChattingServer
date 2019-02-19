@@ -1,11 +1,11 @@
-package chattingServer.clientHandleEvent;
+package chattingServer.serverEvent;
 
 import java.io.Serializable;
 
 /**
  * 클라이언트 응용 프로그램에서 기본 대화창을 열 정보를 제공
  */
-public class ChatRoomViewBuildEvent extends ClientHandleEvent implements Serializable {
+public class ChatRoomViewBuildEvent extends ServerEvent implements Serializable {
 	private static final long serialVersionUID = 1L;
 	/** 감싸인 사용자 이름 */
 	private final String userName;

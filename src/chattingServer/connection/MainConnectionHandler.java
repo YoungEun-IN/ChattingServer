@@ -6,10 +6,10 @@ import java.net.ServerSocket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import chattingClient.serverHandleEvent.ServerHandledEvent;
-import chattingServer.clientHandleEvent.ChatRoomViewBuildEvent;
-import chattingServer.clientHandleEvent.GiveChattingInfoEvent;
-import chattingServer.clientHandleEvent.AlertToClientEvent;
+import chattingClient.clientEvent.ClientdEvent;
+import chattingServer.serverEvent.ChatRoomViewBuildEvent;
+import chattingServer.serverEvent.ConversationBuildEvent;
+import chattingServer.serverEvent.AlertToClientEvent;
 import chattingServer.model.UserId;
 import chattingServer.model.data.RoomData;
 import chattingServer.model.data.UserData;
@@ -25,7 +25,7 @@ public class MainConnectionHandler {
 	/** 포트 넘버 */
 	private final int portNumber;
 	/** 이벤트 큐 */
-	private final BlockingQueue<ServerHandledEvent> eventQueue;
+	private final BlockingQueue<ClientdEvent> eventQueue;
 
 	/**
 	 * 지정된 포트에 서버를 연결하는 생성자. 새 연결을 연결하기 위해 별도의 링크를 만듭니다.
@@ -33,7 +33,7 @@ public class MainConnectionHandler {
 	 * @param portNumber
 	 * @param eventQueue
 	 */
-	public MainConnectionHandler(final int portNumber, final BlockingQueue<ServerHandledEvent> eventQueueObject) {
+	public MainConnectionHandler(final int portNumber, final BlockingQueue<ClientdEvent> eventQueueObject) {
 		this.portNumber = portNumber;
 		this.eventQueue = eventQueueObject;
 		this.userOutputStreams = new HashMap<UserId, ObjectOutputStream>();
@@ -76,7 +76,7 @@ public class MainConnectionHandler {
 	 */
 	private void sendDirectMessage(final String userName, final RoomData roomData) {
 		try {
-			GiveChattingInfoEvent giveChattingInfoEvent = new GiveChattingInfoEvent(roomData);
+			ConversationBuildEvent giveChattingInfoEvent = new ConversationBuildEvent(roomData);
 			userOutputStreams.get(new UserId(userName)).writeObject(giveChattingInfoEvent);
 		} catch (IOException ex) {
 			System.err.println("직접 메시지 보낼 때 익셉션 발생. " + ex);

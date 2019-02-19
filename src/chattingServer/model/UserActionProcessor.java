@@ -3,10 +3,10 @@ package chattingServer.model;
 import java.util.Calendar;
 import java.util.HashSet;
 
-import chattingClient.serverHandleEvent.CreateNewRoomEvent;
-import chattingClient.serverHandleEvent.JoinExistingRoomEvent;
-import chattingClient.serverHandleEvent.QuitChattingEvent;
-import chattingClient.serverHandleEvent.SendMessageEvent;
+import chattingClient.clientEvent.CreateNewRoomEvent;
+import chattingClient.clientEvent.JoinExistingRoomEvent;
+import chattingClient.clientEvent.QuitChattingEvent;
+import chattingClient.clientEvent.SendMessageEvent;
 import chattingServer.model.data.MessageData;
 import chattingServer.model.data.RoomData;
 import chattingServer.model.data.UserData;

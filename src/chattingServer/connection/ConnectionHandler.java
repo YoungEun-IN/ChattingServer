@@ -7,11 +7,11 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
-import chattingClient.serverHandleEvent.CreateNewRoomEvent;
-import chattingClient.serverHandleEvent.JoinExistingRoomEvent;
-import chattingClient.serverHandleEvent.QuitChattingEvent;
-import chattingClient.serverHandleEvent.ServerHandledEvent;
-import chattingServer.clientHandleEvent.AlertToClientEvent;
+import chattingClient.clientEvent.CreateNewRoomEvent;
+import chattingClient.clientEvent.JoinExistingRoomEvent;
+import chattingClient.clientEvent.QuitChattingEvent;
+import chattingClient.clientEvent.ClientdEvent;
+import chattingServer.serverEvent.AlertToClientEvent;
 import chattingServer.model.UserId;
 
 /**
@@ -27,7 +27,7 @@ public class ConnectionHandler extends Thread {
 	/** 사용자별 출력 스트림 맵 */
 	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
 	/** 블로킹 큐 */
-	private final BlockingQueue<ServerHandledEvent> eventQueue;
+	private final BlockingQueue<ClientdEvent> eventQueue;
 	/** 작업중 식별 플래그 */
 	private boolean isRunning;
 
@@ -38,7 +38,7 @@ public class ConnectionHandler extends Thread {
 	 * @param eventQueue        
 	 * @param userOutputStreams
 	 */
-	public ConnectionHandler(final Socket userSocket, final BlockingQueue<ServerHandledEvent> eventQueue, final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
+	public ConnectionHandler(final Socket userSocket, final BlockingQueue<ClientdEvent> eventQueue, final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
 		this.userSocket = userSocket;
 		this.eventQueue = eventQueue;
 		this.userOutputStreams = userOutputStreams;
@@ -57,10 +57,10 @@ public class ConnectionHandler extends Thread {
 	 * 클라이언트에서 이벤트를 수신하여 블로킹 큐에 추가하는 클래스의 기본 루프
 	 */
 	public void run() {
-		ServerHandledEvent appEvent;
+		ClientdEvent appEvent;
 		while (isRunning) {
 			try {
-				appEvent = (ServerHandledEvent) inputStream.readObject();
+				appEvent = (ClientdEvent) inputStream.readObject();
 
 				/** 클라이언트가 방에 들어 오거나 방을 만들 때, 출력 스트림을 작성 */
 				if (appEvent instanceof CreateNewRoomEvent) {
