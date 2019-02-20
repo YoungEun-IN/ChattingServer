@@ -12,7 +12,7 @@ import chattingClient.clientSideEvent.SendMessageEvent;
 import chattingClient.clientSideEvent.ClientSideEvent;
 import chattingServer.serverSideEvent.AlertToClientEvent;
 import chattingServer.connection.ConnectionHandler;
-import chattingServer.model.UserActionProcessor;
+import chattingServer.model.EventProcessor;
 
 /**
  * 클라이언트와 서버 간의 적절한 통신을 담당하는 컨트롤러 클래스.
@@ -23,7 +23,7 @@ public class Controller {
 	/** connectionHandler */
 	private final ConnectionHandler connectionHandler = new ConnectionHandler(5000, eventQueue);
 	/** userActionProcessor */
-	private final UserActionProcessor userActionProcessor = new UserActionProcessor();
+	private final EventProcessor eventProcessor = new EventProcessor();
 	/** 이벤트 처리 전략 맵 */
 	private final Map<Class<? extends ClientSideEvent>, ClientSideStrategy> strategyMap;
 
@@ -38,10 +38,6 @@ public class Controller {
 
 	/**
 	 * 지정된 매개 변수를 기반으로 컨트롤을 만드는 생성자
-	 * 
-	 * @param eventQueue
-	 * @param userActionProcessor
-	 * @param connectionHandler   사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
 	 */
 	private Controller() {
 		// 이벤트 처리 정책 맵 작성
@@ -59,8 +55,8 @@ public class Controller {
 		while (true) {
 			try {
 				ClientSideEvent clientdEvent = eventQueue.take();
-				ClientSideStrategy clientSideEventStrategy = strategyMap.get(clientdEvent.getClass());
-				clientSideEventStrategy.execute(clientdEvent);
+				ClientSideStrategy clientSideStrategy = strategyMap.get(clientdEvent.getClass());
+				clientSideStrategy.execute(clientdEvent);
 			} catch (InterruptedException e) {
 				// 컨트롤러가 이벤트가 나타날 때까지 일시 중지해야하므로 아무 것도하지 않습니다.
 			}
@@ -85,7 +81,7 @@ public class Controller {
 	class CreateNewRoomStrategy extends ClientSideStrategy {
 		void execute(final ClientSideEvent clientSideEvent) {
 			CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) clientSideEvent;
-			if (userActionProcessor.createNewRoom(createNewRoomEvent)) {
+			if (eventProcessor.createNewRoom(createNewRoomEvent)) {
 				connectionHandler.buildChatRoomView(createNewRoomEvent.getUserName(), createNewRoomEvent.getRoomName());
 			} else {
 				connectionHandler.alert(new AlertToClientEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserName()));
@@ -99,7 +95,7 @@ public class Controller {
 	class JoinExistingRoomStrategy extends ClientSideStrategy {
 		void execute(final ClientSideEvent clientSideEvent) {
 			JoinExistingRoomEvent joinExistingRoomEvent = (JoinExistingRoomEvent) clientSideEvent;
-			if (userActionProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
+			if (eventProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
 				connectionHandler.buildChatRoomView(joinExistingRoomEvent.getUserName(), joinExistingRoomEvent.getRoomName());
 			} else {
 				connectionHandler.alert(new AlertToClientEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserName()));
@@ -113,8 +109,8 @@ public class Controller {
 	class SendMessageStrategy extends ClientSideStrategy {
 		void execute(final ClientSideEvent clientSideEvent) {
 			SendMessageEvent sendMessageEvent = (SendMessageEvent) clientSideEvent;
-			userActionProcessor.addMessageOfUser(sendMessageEvent);
-			connectionHandler.sendMessageToAll(userActionProcessor.getRoomData(sendMessageEvent));
+			eventProcessor.addMessageOfUser(sendMessageEvent);
+			connectionHandler.sendMessageToAll(eventProcessor.getRoomData(sendMessageEvent));
 		}
 	}
 
@@ -124,7 +120,7 @@ public class Controller {
 	class QuitChattingStrategy extends ClientSideStrategy {
 		void execute(final ClientSideEvent clientSideEvent) {
 			QuitChattingEvent quitChattingEvent = (QuitChattingEvent) clientSideEvent;
-			userActionProcessor.setUserToInactive(quitChattingEvent);
+			eventProcessor.setUserToInactive(quitChattingEvent);
 		}
 	}
 }

@@ -19,7 +19,7 @@ import chattingServer.serverSideEvent.ConversationBuildEvent;
  */
 public class ConnectionHandler {
 	/** userId가 키인 출력 스트림을 사용자가 보유하고있는 맵 */
-	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
+	private final HashMap<UserId, ObjectOutputStream> oosMap= new HashMap<UserId, ObjectOutputStream>();
 	/** 서버소켓 */
 	private ServerSocket serverSocket;
 	/** 포트 넘버 */
@@ -36,10 +36,9 @@ public class ConnectionHandler {
 	public ConnectionHandler(final int portNumber, final BlockingQueue<ClientSideEvent> eventQueueObject) {
 		this.portNumber = portNumber;
 		this.eventQueue = eventQueueObject;
-		this.userOutputStreams = new HashMap<UserId, ObjectOutputStream>();
 
 		createServerSocket();
-		ServerSocketThread serverSocketThread = new ServerSocketThread(serverSocket, eventQueue, userOutputStreams);
+		ServerSocketThread serverSocketThread = new ServerSocketThread(serverSocket, eventQueue, oosMap);
 		serverSocketThread.start();
 	}
 
@@ -77,7 +76,7 @@ public class ConnectionHandler {
 	private void sendDirectMessage(final String userName, final RoomData roomData) {
 		try {
 			ConversationBuildEvent conversationBuildEvent = new ConversationBuildEvent(roomData);
-			userOutputStreams.get(new UserId(userName)).writeObject(conversationBuildEvent);
+			oosMap.get(new UserId(userName)).writeObject(conversationBuildEvent);
 		} catch (IOException ex) {
 			System.err.println("sendDirectMessage 익셉션 발생. " + ex);
 		}
@@ -91,7 +90,7 @@ public class ConnectionHandler {
 	 */
 	public void buildChatRoomView(final String userName, final String roomName) {
 		try {
-			userOutputStreams.get(new UserId(userName)).writeObject(new ChatRoomViewBuildEvent(userName, roomName));
+			oosMap.get(new UserId(userName)).writeObject(new ChatRoomViewBuildEvent(userName, roomName));
 		} catch (IOException e) {
 			System.err.println(e);
 		}
@@ -104,8 +103,8 @@ public class ConnectionHandler {
 	 */
 	public void alert(AlertToClientEvent messageObject) {
 		try {
-			userOutputStreams.get(new UserId(messageObject.getUserName())).writeObject(messageObject);
-			userOutputStreams.remove(new UserId(messageObject.getUserName()));
+			oosMap.get(new UserId(messageObject.getUserName())).writeObject(messageObject);
+			oosMap.remove(new UserId(messageObject.getUserName()));
 		} catch (IOException ex) {
 			System.err.println("alert 익셉션 발생. " + ex);
 		}

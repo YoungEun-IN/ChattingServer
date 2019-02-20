@@ -14,14 +14,14 @@ import chattingServer.model.data.UserData;
 /**
  * 전체 모델 인터페이스를 제공하는 클래스
  */
-public class UserActionProcessor {
+public class EventProcessor {
 	/** 활성화된 룸 목록이 포함 된 세트 */
 	private final HashSet<Room> roomSet;
 
 	/**
 	 * 생성자
 	 */
-	public UserActionProcessor() {
+	public EventProcessor() {
 		this.roomSet = new HashSet<Room>();
 	}
 

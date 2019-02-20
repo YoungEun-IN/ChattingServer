@@ -20,20 +20,20 @@ class ServerSocketThread extends Thread {
 	/** 블로킹 큐 */
 	private final BlockingQueue<ClientSideEvent> eventQueue;
 	/** 해시맵 */
-	private final HashMap<UserId, ObjectOutputStream> userOutputStreams;
+	private final HashMap<UserId, ObjectOutputStream> oosMap;
 
 	/**
 	 * 새로운 연결 링크를 생성하는 생성자
 	 * 
 	 * @param serverSocket
 	 * @param eventQueue
-	 * @param userOutputStreams
+	 * @param oosMap
 	 */
 	public ServerSocketThread(final ServerSocket serverSocket, final BlockingQueue<ClientSideEvent> eventQueue,
-			final HashMap<UserId, ObjectOutputStream> userOutputStreams) {
+			final HashMap<UserId, ObjectOutputStream> oosMap) {
 		this.serverSocket = serverSocket;
 		this.eventQueue = eventQueue;
-		this.userOutputStreams = userOutputStreams;
+		this.oosMap = oosMap;
 	}
 
 	/**
@@ -50,7 +50,7 @@ class ServerSocketThread extends Thread {
 				int remoteHostPort = remoteSocketAddress.getPort();
 
 				System.out.println("서버에 클라이언트 연결됨. connected socket address:  " + remoteHostName + " port : " + remoteHostPort);
-				ConnectionThread connectionThread = new ConnectionThread(socket, eventQueue, userOutputStreams);
+				ConnectionThread connectionThread = new ConnectionThread(socket, eventQueue, oosMap);
 				connectionThread.start();
 			} catch (IOException ex) {
 				System.err.println(ex);
