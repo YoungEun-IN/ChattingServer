@@ -3,9 +3,9 @@ package chattingServer.model;
 import java.util.Date;
 
 /**
- * 사용자의 전체 대화로 구성된 메시지의 단일 부분을 나타내는 클래스
+ * 메시지 정보를 담고 있다.
  */
-class Message implements Comparable<Message> {
+public class Message implements Comparable<Message> {
 	/** message */
 	private final String message;
 	/** timeStamp */

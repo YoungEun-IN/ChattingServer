@@ -1,4 +1,4 @@
-package chattingServer.model;
+package chattingServer.controller;
 
 import java.util.Calendar;
 import java.util.HashSet;
@@ -7,21 +7,25 @@ import chattingClient.clientSideEvent.CreateNewRoomEvent;
 import chattingClient.clientSideEvent.JoinExistingRoomEvent;
 import chattingClient.clientSideEvent.QuitChattingEvent;
 import chattingClient.clientSideEvent.SendMessageEvent;
+import chattingServer.model.Message;
+import chattingServer.model.Room;
+import chattingServer.model.User;
+import chattingServer.model.UserId;
 import chattingServer.model.data.MessageData;
 import chattingServer.model.data.RoomData;
 import chattingServer.model.data.UserData;
 
 /**
- * 전체 모델 인터페이스를 제공하는 클래스
+ * 클라이언트의 동작을 해석하여 실행한다.
  */
-public class EventProcessor {
+public class StrategyProcessor {
 	/** 활성화된 룸 목록이 포함 된 세트 */
 	private final HashSet<Room> roomSet;
 
 	/**
 	 * 생성자
 	 */
-	public EventProcessor() {
+	public StrategyProcessor() {
 		this.roomSet = new HashSet<Room>();
 	}
 

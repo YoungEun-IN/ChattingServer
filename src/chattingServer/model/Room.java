@@ -3,9 +3,9 @@ package chattingServer.model;
 import java.util.HashSet;
 
 /**
- * 방에있는 사용자 집합과 그 이름을 포함하는 하나의 방을 나타내는 클래스
+ * 방 정보를 담고 있다.
  */
-class Room {
+public class Room {
 	/** roomName */
 	private String roomName;
 	/** listOfUsers */

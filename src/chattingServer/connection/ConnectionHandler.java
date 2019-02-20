@@ -15,7 +15,7 @@ import chattingServer.serverSideEvent.ChatRoomViewBuildEvent;
 import chattingServer.serverSideEvent.ConversationBuildEvent;
 
 /**
- * 사용자가 종료 스트림에 대한 정보를 저장하고 메시지를 배포하는 서버의 마스터 클래스
+ * 채팅을 처리할 쓰레드들을 실행한다.
  */
 public class ConnectionHandler {
 	/** userId가 키인 출력 스트림을 사용자가 보유하고있는 맵 */
@@ -53,7 +53,7 @@ public class ConnectionHandler {
 			System.exit(1);
 		}
 	}
-
+	
 	/**
 	 * 같은 방에있는 모든 사용자에게 메시지 보내는 메소드
 	 * 

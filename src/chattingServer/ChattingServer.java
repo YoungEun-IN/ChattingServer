@@ -3,7 +3,7 @@ package chattingServer;
 import chattingServer.controller.Controller;
 
 /**
- * 모든 구성 요소의 적절한 초기화를 담당
+ * Controller 객체를 싱글톤으로 생성한다.
  */
 public class ChattingServer {
 	/**

@@ -10,7 +10,7 @@ import chattingClient.clientSideEvent.SendMessageEvent;
  * 유형 세트로 구성됩니다.
  */
 
-class User {
+public class User {
 	/** userID */
 	private final UserId userID;
 	/** 사용자가 보낸 일련의 메시지 */

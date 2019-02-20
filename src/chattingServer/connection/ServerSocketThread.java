@@ -12,7 +12,7 @@ import chattingClient.clientSideEvent.ClientSideEvent;
 import chattingServer.model.UserId;
 
 /**
- * ServerSocket을 관리하는 클래스
+ * 클라이언트의 요청소켓을 받아 각 소켓마다 ConnectionThread를 파생시킨다.
  */
 class ServerSocketThread extends Thread {
 	/** Socket 서버 */

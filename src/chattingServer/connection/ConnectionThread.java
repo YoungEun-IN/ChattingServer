@@ -16,7 +16,7 @@ import chattingServer.model.UserId;
 import chattingServer.serverSideEvent.AlertToClientEvent;
 
 /**
- * 클라이언트로부터 이벤트를 수신하여 큐에 추가하는 역할을 담당하는 클래스
+ * 클라이언트의 소켓을 분석해 채팅방별로 관리해 적절하게 메시지를 뿌려준다. 유저가 방에 접속할때마다 이 쓰레드가 하나씩 생긴다.
  */
 public class ConnectionThread extends Thread {
 	/** socket */

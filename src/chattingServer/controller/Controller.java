@@ -5,17 +5,16 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import chattingClient.clientSideEvent.ClientSideEvent;
 import chattingClient.clientSideEvent.CreateNewRoomEvent;
 import chattingClient.clientSideEvent.JoinExistingRoomEvent;
 import chattingClient.clientSideEvent.QuitChattingEvent;
 import chattingClient.clientSideEvent.SendMessageEvent;
-import chattingClient.clientSideEvent.ClientSideEvent;
-import chattingServer.serverSideEvent.AlertToClientEvent;
 import chattingServer.connection.ConnectionHandler;
-import chattingServer.model.EventProcessor;
+import chattingServer.serverSideEvent.AlertToClientEvent;
 
 /**
- * 클라이언트와 서버 간의 적절한 통신을 담당하는 컨트롤러 클래스.
+ * 클라이언트의 동작을 해석하는 전략맵을 생성하고 분기한다.
  */
 public class Controller {
 	/** eventQueue */
@@ -23,7 +22,7 @@ public class Controller {
 	/** connectionHandler */
 	private final ConnectionHandler connectionHandler = new ConnectionHandler(5000, eventQueue);
 	/** userActionProcessor */
-	private final EventProcessor eventProcessor = new EventProcessor();
+	private final StrategyProcessor strategyProcessor = new StrategyProcessor();
 	/** 이벤트 처리 전략 맵 */
 	private final Map<Class<? extends ClientSideEvent>, ClientSideStrategy> strategyMap;
 
@@ -81,7 +80,7 @@ public class Controller {
 	class CreateNewRoomStrategy extends ClientSideStrategy {
 		void execute(final ClientSideEvent clientSideEvent) {
 			CreateNewRoomEvent createNewRoomEvent = (CreateNewRoomEvent) clientSideEvent;
-			if (eventProcessor.createNewRoom(createNewRoomEvent)) {
+			if (strategyProcessor.createNewRoom(createNewRoomEvent)) {
 				connectionHandler.buildChatRoomView(createNewRoomEvent.getUserName(), createNewRoomEvent.getRoomName());
 			} else {
 				connectionHandler.alert(new AlertToClientEvent("\r\n" + "주어진 이름의 방이 이미 있습니다.", createNewRoomEvent.getUserName()));
@@ -95,7 +94,7 @@ public class Controller {
 	class JoinExistingRoomStrategy extends ClientSideStrategy {
 		void execute(final ClientSideEvent clientSideEvent) {
 			JoinExistingRoomEvent joinExistingRoomEvent = (JoinExistingRoomEvent) clientSideEvent;
-			if (eventProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
+			if (strategyProcessor.addUserToSpecificRoom(joinExistingRoomEvent)) {
 				connectionHandler.buildChatRoomView(joinExistingRoomEvent.getUserName(), joinExistingRoomEvent.getRoomName());
 			} else {
 				connectionHandler.alert(new AlertToClientEvent("가입하려는 방은 존재하지 않습니다.", joinExistingRoomEvent.getUserName()));
@@ -109,8 +108,8 @@ public class Controller {
 	class SendMessageStrategy extends ClientSideStrategy {
 		void execute(final ClientSideEvent clientSideEvent) {
 			SendMessageEvent sendMessageEvent = (SendMessageEvent) clientSideEvent;
-			eventProcessor.addMessageOfUser(sendMessageEvent);
-			connectionHandler.sendMessageToAll(eventProcessor.getRoomData(sendMessageEvent));
+			strategyProcessor.addMessageOfUser(sendMessageEvent);
+			connectionHandler.sendMessageToAll(strategyProcessor.getRoomData(sendMessageEvent));
 		}
 	}
 
@@ -120,7 +119,7 @@ public class Controller {
 	class QuitChattingStrategy extends ClientSideStrategy {
 		void execute(final ClientSideEvent clientSideEvent) {
 			QuitChattingEvent quitChattingEvent = (QuitChattingEvent) clientSideEvent;
-			eventProcessor.setUserToInactive(quitChattingEvent);
+			strategyProcessor.setUserToInactive(quitChattingEvent);
 		}
 	}
 }
