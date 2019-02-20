@@ -43,14 +43,14 @@ class ServerSocketThread extends Thread {
 		System.out.println("서버가 포트에 새 연결을 시작. 포트번호 : " + serverSocket.getLocalPort());
 		while (true) {
 			try {
-				Socket userSocket = serverSocket.accept();
+				Socket socket = serverSocket.accept();
 
-				InetSocketAddress remoteSocketAddress = (InetSocketAddress) userSocket.getRemoteSocketAddress();
+				InetSocketAddress remoteSocketAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
 				String remoteHostName = remoteSocketAddress.getAddress().getHostAddress();
 				int remoteHostPort = remoteSocketAddress.getPort();
 
 				System.out.println("서버에 클라이언트 연결됨. connected socket address:  " + remoteHostName + " port : " + remoteHostPort);
-				ConnectionThread connectionThread = new ConnectionThread(userSocket, eventQueue, userOutputStreams);
+				ConnectionThread connectionThread = new ConnectionThread(socket, eventQueue, userOutputStreams);
 				connectionThread.start();
 			} catch (IOException ex) {
 				System.err.println(ex);
