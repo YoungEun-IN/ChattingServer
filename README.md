@@ -19,7 +19,7 @@
 5. 통신은 모두 직렬화된 객체를 사용한다.
 
 ## 샘플 화면
-#####대화방 접속 화면
+##### 대화방 접속 화면
 
 <img src="img/welcome.png"  />
 
@@ -103,7 +103,7 @@
 - QuitChattingEvent : 사용자가 방을 나갔을 때 발생하는 이벤트
 - SendMessageEvent : 사용자가 메시지를 입력하고 전송할 때 발생하는 이벤트
 
-###어떻게 실행하나요?
+### 어떻게 실행하나요?
 ##### 1. 원하는 디렉토리 위치에서 아래 두 명령어 실행
 ```
 $ git clone https://github.com/YoungEun-IN/CommunicatorServer
