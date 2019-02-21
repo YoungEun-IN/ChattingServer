@@ -1,144 +1,142 @@
-# Communicator server
+# Chatting server
 
-Java Chatting Application
-===
-
-<a href="https://1ilsang.blog.me/"><img src="https://img.shields.io/badge/blog-1ilsang.blog.me-red.svg" /></a>
 <a href="#"><img src="https://img.shields.io/github/last-commit/1ilsang/java-mvc-chatting.svg?style=flat" /></a>
 <a href="#"><img src="https://img.shields.io/github/languages/top/1ilsang/java-mvc-chatting.svg?colorB=yellow&style=flat" /></a>
 <a href="#"><img src="https://img.shields.io/badge/license-MIT-green.svg" /></a>
 
-멀티 채팅 토이 프로젝트.
-
+## 어떤 프로젝트인가요?
+- 멀티 채팅 토이 프로젝트.
 - 핵심 목표: 다형성, MVC, 쓰레드, 소켓을 짚어보자.
 - 제작 기간: 약 10일
 - Keyword: MVC, Thread, Socket, Polymorphism, Serializable, Swing, Singleton, Strategy Pattern
 
+
+##구현 시 중점 사항
+1. MVC 패턴을 사용하여 클래스 별 기능이 명확하도록 설계한다.
+2. 컨트롤러 클래스는 싱글톤이 되도록 하여 불필요한 객체 생성을 막는다.
+3. 서버와 클라이언트 간 전달되는 객체는 전략 패턴을 사용하여 캡슐화하고, BlockingQueue를 활용하여 이벤트가 순서대로 저장되도록 한다.
+4. final 키워드와 private 키워드를 적절히 사용하여 버그의 가능성을 최소화한다.
+5. 통신은 모두 직렬화된 객체를 사용한다.
+
+##샘플 화면
+#####대화방 접속 화면
+
+<img src="img/welcome.png"  />
+
+#####채팅화면
+
+<img src="img/chatting.png" />
+
+#####서버 실행 콘솔로그
+
+<img src="img/server.png" />
+
+#####클라이언트 실행 콘솔로그
+
+<img src="img/client.png" />
+
 <br/>
 
-샘플 화면
----
-AWT로 개발되었기 때문에 윈도우에서는 참혹한 뷰를 보셔야 합니다(...)
+##한눈에 보는 전체 구성
 
-| Login View | Chat View |
-|:----------------------------------------:|:-----------------------------------------:|
-|<img src="markdown/img/login.gif" width=300 />|<img src="markdown/img/chat.gif" width=300 />|
-
-- Server Log
-
-<img src="markdown/img/serverlog.gif" width=550 />
-
-<br/>
-
-한눈에 보는 전체 구성
----
-<img src="markdown/img/simplePackageDiagram.png" width=800 >
+<img src="img/welcome.png"  />
 
 <hr/>
 
 <br/>
 
-<img src="markdown/img/serverDiagram.png" width=550>
-
-- Server:
-  - 서버는 실행과 동시에 `LogThread`, `LoginSocketThread`, `ChatRoomSocketThread` 3가지 쓰레드를 파생시킨다.
-  - `LogThread`는 서버에 들어오는 모든 요청/메시지 등을 로그에 기록 및 텍스트 파일에 저장한다.
-  - 모든 로그는 resources/chatLog.txt 에 자동 저장된다.
-  - 이때 저장 순서를 지켜주기 위해 `queue`에 담아 순차적으로 저장한다.
-  - `LoginSocketThread`는 로그인 처리를 하는 *단일* 쓰레드로, DB를 사용하지 않으므로 **Map 자료구조**를 사용해 "이름":"유저객체"로 저장한다.
-  - 그러므로 서버가 재시작되면 유저정보는 사라진다.
-  - `ChatRoomSocketThread`는 클라이언트의 요청소켓을 받아 각 소켓마다 `ChatSocketThread`를 파생시킨다.
-  - `ChatSocketThread` 객체는 클라이언트의 소켓을 분석해 채팅방별로 관리해 적절하게 메시지를 뿌려준다.
-
-- [Read more!](markdown/index/Server.md)
+##### Server:
+  - 서버는 실행과 동시에 `ServerSocketThread` 를 파생시키고, `ServerSocketThread`는 다시 채팅방별로 `ConnectionThread`를 파생시킨다.
+  - 클라이언트 요청은 저장 순서를 지켜주기 위해 `Blocking Queue`에 담아 순차적으로 저장한다.
+  - `ConnectionThread` 객체는 클라이언트의 소켓을 분석해 채팅방별로 관리해 적절하게 메시지를 뿌려준다.
 <br/>
 
-<img src="markdown/img/clientDiagram.png" width=1000 />
-<img src="markdown/img/logic.png" width=800 />
 
-- Client: 
-  - 모든 요청은 `DispatcherController`를 거치며 `HandlerMapping` 객체가 해당 비지니스의 적절한 `Controller`를 찾아 메서드를 실행한다.
-  - 각 `Controller`는 실제 비지니스 수행을 위해 자신의 `Service`에 요청 객체를 넘긴다.
-  - `Service`에서 서버와 통신하는 Login, Chatting 소켓이 열린다. 통신은 모두 `직렬화`된 객체를 사용한다.
-  - Chatting 소켓은 연결마다 `ChatAcceptThread` 쓰레드 객체로 파생해 진행한다.
-  - 각각의 요청은 `ModelAndView` 객체에 담겨 레이어층(컨트롤러/뷰/서비스 등)을 거친다.
-  - Service 를 통해 처리된 데이터는 `return` 되어 `DispatcherController`에게 전달되며 이때 `ViewResolver`가 유저에게 보여줄 화면객체를 찾는다.
+##### Client: 
+  - `Connection`에서 서버와 통신하는 소켓이 열린다. 통신은 모두 `직렬화`된 객체를 사용한다.
+  - 소켓은 `ListenThread` 쓰레드 객체로 파생해 진행한다.
   - 보여줄 화면객체를 찾았다면  `View` 객체를 통해 유저에게 화면을 보여준다.
-  - 모든 컨트롤러와 서비스, 뷰는 싱글톤으로 구성되어 있다.
-
-- [Read more!](markdown/index/Client.md)
 
 <br/>
 
-어떻게 실행하나요?
----
-- 로컬 환경에서 실행하기
-  - client 폴더과 server 폴더를 각각 *root*로 잡아 ChatTest, ChatServer 클래스에서 main 실행.
-  - *중요* `server/resources/` 폴더에 있는 `chatLog.dat` 파일을 `chatLog.txt`로 변경해주셔야 합니다.
-  - 로컬환경이므로 `REMOTE_HOST`가 `127.0.0.1`인지 꼭 확인.
 
-- [클라우드 환경(GCP)으로 서비스 해보기](markdown/index/Gcp.md)
-  - GCP Console 로 들어간다.
-  - VM 인스턴스를 생성한다.
-  - Server 를 jar 파일로 만든다.
-  - ssh 키를 만든다.
-  - gcp 에 추가해준다.
-  - scp 를 통해 VM에 jar 파일을 보낸다.
-  - 채팅포트 `7777`과 로그인포트 `6666`을 열어준다.
-  - 서버실행. ```java -jar 파일명.jar```
-  - Client 를 jar 파일로 만든다.(REMOTE_HOST 설정)
-  - client jar 파일을 배포한다.(더 해보기: exe 파일로 변환)
-  - 재밌게 채팅한다!
+##클래스 단위로 알아보기
+#### Server
+- ChattingServer : main 메소드 안에서 Controller 객체를 싱글톤으로 생성한다.
 
-클래스 단위로 알아보기
----
-- [Client](markdown/index/Client.md)
-  - Main
-  - Controller
-  - DTO
-  - Domain
-  - View
-  - Service
-  - Thread
-  - Util
+#####Connection
+- ConnectionHandler : 채팅을 처리할 쓰레드들을 실행한다.
+- ConnectionThread : 클라이언트의 소켓을 분석해 채팅방별로 관리해 적절하게 메시지를 뿌려준다. 유저가 방에 접속할때마다 이 쓰레드가 하나씩 생긴다.
+- ServerSocketThread : 클라이언트의 요청소켓을 받아 각 소켓마다 ConnectionThread를 파생시킨다.
+ 
+#####controller
+- Controller : 클라이언트의 동작을 해석하는 전략맵을 생성하고 분기한다.
+- StrategyProcessor : 클라이언트의 동작을 해석하여 실행한다.
+
+#####serverSideEvent
+- ServerSideEvent : 서버 이벤트의 추상클래스
+- AlertToClientEvent : 사용자에게 알림을 줄 때 발생하는 이벤트
+- ChatRoomViewBuildEvent : 채팅창을 구성할 때 발생하는 이벤트
+- ConversationBuildEvent : 대화를 구성할 때 발생하는 이벤트
+- 
+
+#####model.data
+- MessageData : 메시지 정보를 담고 있다.
+- RoomData : 방 정보를 담고 있다.
+- UserData : 사용자 정보를 담고 있다.
+
+#### Cient
+- chattingClient : Connection 객체를 싱글톤으로 생성한다.
+
+#####Connection
+- Connection : Socekt 을 열어 원격지 호스트와의 통로를 만든다. 객체를 교환하므로 ObjectIn(Out)putStream 을 열어준다.
+
+#####view
+- ViewController : 서버의 동작을 해석하는 전략맵을 생성하고 분기한다.
+- ChatRoomView : 대화창 화면을 그려준다.
+- CreateOrJoinRoomView : 프로그램 실행시 가장 먼저 보이는 화면을 그려준다.
   
-- [Server](markdown/index/Server.md)
-  - Main
-  - Thread
-  - DTO/Domain 은 client 와 동일.
-  
-맺으며
----
+#####clientSideEvent 
+- clientSideEvent : 클라이언트 이벤트의 추상클래스
+- CreateNewRoomEvent : 새로 방을 생성할 때 발생하는 이벤트
+- JoinExistingRoomEvent : 이미 존재하는 방에 입장할때 발생하는 이벤트
+- QuitChattingEvent : 사용자가 방을 나갔을 때 발생하는 이벤트
+- SendMessageEvent : 사용자가 메시지를 입력하고 전송할 때 발생하는 이벤트
+
+###어떻게 실행하나요?
+##### 1. 원하는 디렉토리 위치에서 아래 두 명령어 실행
+```
+$ git clone https://github.com/YoungEun-IN/CommunicatorServer
+```
+```
+$ git clone https://github.com/YoungEun-IN/CommunicatorServer
+```
+##### 2. cmd 창에서 프로젝트 위치로 이동
+##### 3. 아래 명령어 순차적으로 실행
+```
+$ java /bin/ChattingServer/ChattingServer
+
+```
+```
+$ java /bin/ChattingCient/ChattingCient
+
+```
+- 참고 : 채팅 프로그램은 5000 포트를 사용합니다.
+
+### 맺으며
 - 코딩도 어렵지만 문서화가 더 어려웠다.
 - 초반 설계가 정말 어려웠다. 관점 분리가 특히 어려웠다.
-- TODOLIST
+
+##### TODOLIST
   - [ ] MSA 환경으로 업그레이드
-  - [ ] 중복 로그인 방지
-  - [ ] 파일 log 배치처리 및 자동화
+  - [ ] 로그인 기능 추가
+  - [ ] 파일 log애 저장하는 기능 추가
   - [ ] 채팅방 동적 생성
   - [ ] 모든 상수 필드 외부파일로 빼거나 클래스화
-  - [ ] 채팅방 입장시 태그가 잠깐 보이는 문제 해결
 - 취업하고싶다.
-- [Come to my Blog!](https://1ilsang.blog.me)
 
-License
----
+### License
 This is released under the MIT license. See [LICENSE](LICENSE) for details.
 
 
-## Getting Started
 
-```
-$ git clone https://github.com/Morzan3/CommunicatorServer
-```
-
-## Running the app
-
-We run the app as normal java application
-
-```
-$ java /src/pl/slusarczyk/ignacy/CommunicatorServer/CommunicatorServer.java
-
-```
-
-Server will start listening on port 5000
