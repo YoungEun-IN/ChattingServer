@@ -78,7 +78,6 @@
 - AlertToClientEvent : 사용자에게 알림을 줄 때 발생하는 이벤트
 - ChatRoomViewBuildEvent : 채팅창을 구성할 때 발생하는 이벤트
 - ConversationBuildEvent : 대화를 구성할 때 발생하는 이벤트
-- 
 
 ##### model.data
 - MessageData : 메시지 정보를 담고 있다.
